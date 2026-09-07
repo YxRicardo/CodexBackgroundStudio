@@ -8,7 +8,9 @@ Only one background image and one wash layer are active on the main shell. On ho
 
 The workspace title bar (the area labelled “我的工作空间”) is an independent frosted-glass surface. Its overlay color, opacity, and blur are adjustable separately from the general panel and sidebar settings, while the selector continues to target the native header only.
 
-The home-specific native MainContentTopFade decoration is made transparent. The title toolbar remains a separate readable panel. For the home composer, its root background is transparent and the native rounded ComposerLayoutBody owns the configured panel color; ordinary conversations retain their root panel background.
+The native MainContentTopFade decoration is made transparent in both ChatGPT Chat and Work so its token-colored gradient cannot form a strip over the artwork. The title toolbar remains a separate readable panel. For the Work/home composer, its root background is transparent and the native rounded ComposerLayoutBody owns the configured panel color. ChatGPT Chat reverses that ownership: its additional nearly-opaque ComposerLayoutBody is transparent and the configured root panel remains the single glass layer.
+
+Scheduled tasks and Plugins share a sticky search tray. Its native opaque surface and downward token-colored fade are disabled, while the search-field wrapper receives the configured panel color and opacity as its only glass layer.
 
 Private screenshot evidence and layout verification are stored under work and are excluded from release archives.
 

@@ -86,7 +86,9 @@ export async function makeBundle(input){
  ${regionCSS(`${m}:has(.dream-home)`,c.home,'home')}
  ${h} .dream-home{background:transparent!important;}
  ${h} .dream-home::before,${h} .dream-home::after{content:none!important;}
- ${m}:has(.dream-home) [class*="_MainContentTopFade_"]{background-image:none!important;}
+ /* ChatGPT Chat does not receive .dream-home, but it uses the same native top
+    fade as Work. Its opaque token color appears as a white strip on artwork. */
+ ${m} [class*="_MainContentTopFade_"]{background-image:none!important;}
  ${m} [role="main"]{background:transparent!important;}
  ${regionCSS(s,c.sidebar,'sidebar')}
  ${s}{color:${c.sidebarInk}!important;--color-token-foreground:${c.sidebarInk}!important;--color-token-text-primary:${c.sidebarInk}!important;--color-token-text-secondary:${c.sidebarInk}!important;--color-token-text-tertiary:${c.sidebarInk}!important;--color-token-input-placeholder-foreground:${c.sidebarInk}!important;}
@@ -98,8 +100,16 @@ export async function makeBundle(input){
  ${m}>header,${h} header.app-header-tint{background:${rgba(c.workspaceHeaderWash,c.workspaceHeaderOverlay/100)}!important;color:${c.ink}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
  ${h} .composer-surface-chrome{background:${panel}!important;border-color:${line}!important;color:${c.ink}!important;}
  ${m} [class*="_ComposerLayoutRoot_"]:has(.ProseMirror[contenteditable="true"]){background:${panel}!important;}
+ /* ChatGPT Chat ships an additional nearly-opaque body inside the composer.
+    Let the configured root panel be the single glass layer in that layout. */
+ ${m} [class*="_ComposerLayoutBody_"]:has(.ProseMirror[contenteditable="true"]){background:transparent!important;}
  ${m}:has(.dream-home) [class*="_ComposerLayoutRoot_"]:has(.ProseMirror[contenteditable="true"]){background:transparent!important;}
  ${m}:has(.dream-home) [class*="_ComposerLayoutBody_"]:has(.ProseMirror[contenteditable="true"]){background:${panel}!important;}
+ /* Scheduled tasks and Plugins share a sticky search tray. Remove its native
+    opaque surface/fade and let the search field use the configured glass. */
+ ${m} .sticky.z-30.bg-surface:has(input.bg-transparent){background:transparent!important;}
+ ${m} .sticky.z-30.bg-surface:has(input.bg-transparent)::after{background:none!important;}
+ ${m} div:has(>input.bg-transparent){background:${panel}!important;border-color:${line}!important;}
  ${h} .composer-surface-chrome :is(textarea,.ProseMirror){color:${c.ink}!important;caret-color:${c.accent};}
  ${m} [data-markdown-text-style="assistant-message"]{background-color:${rgba(c.panel,c.replyOpacity/100)}!important;border-radius:10px;}
  ${m} [data-markdown-text-tone="user-message"]{background-color:${rgba(c.panel,c.userMessageOpacity/100)}!important;border-radius:10px;}
