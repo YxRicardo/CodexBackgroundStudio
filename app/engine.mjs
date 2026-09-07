@@ -5,18 +5,20 @@ import {validateThemePackage} from './core/src/index.mjs';
 import {isValidBase64} from './core/src/theme/base64.mjs';
 export const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export const region=()=>({type:'image',color:'#eef7ff',color2:'#dcecff',image:null,opacity:100,wash:'#eef7ff',washOpacity:65,blur:0,x:80,y:50,fit:'cover',zoom:100});
-export const defaults=()=>({schema:1,name:'Azure glow',mode:'light',menuBg:'#98bce2',menuInk:'#203653',ink:'#203653',muted:'#576c85',accent:'#6e60b7',sidebarInk:'#e5f4ff',panel:'#f8fcff',panelOpacity:94,codeOpacity:92,sync:true,home:region(),chat:{...region(),washOpacity:80},sidebar:{...region(),type:'gradient',color:'#193657',color2:'#122743',wash:'#142a49',washOpacity:35}});
+export const defaults=()=>({schema:1,name:'Azure glow',mode:'light',menuBg:'#98bce2',menuInk:'#203653',ink:'#203653',muted:'#576c85',accent:'#6e60b7',sidebarInk:'#e5f4ff',panel:'#f8fcff',panelOpacity:94,codeOpacity:92,replyOpacity:0,userMessageOpacity:0,workspaceHeaderWash:'#f8fcff',workspaceHeaderOverlay:84,workspaceHeaderBlur:18,sync:true,home:region(),chat:{...region(),washOpacity:80},sidebar:{...region(),type:'gradient',color:'#193657',color2:'#122743',wash:'#142a49',washOpacity:35}});
 const color=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);
 export function validate(c){
  if(!c||c.schema!==1)throw Error('不支持的预设格式');
  c=structuredClone(c);c.menuBg??=defaults().menuBg;c.menuInk??=defaults().menuInk;
- c.sidebarShared??=false;c.sidebarOverlay??=0;c.sidebarBlur??=0;
+ c.userMessageOpacity??=defaults().userMessageOpacity;c.replyOpacity??=defaults().replyOpacity;c.sidebarShared??=false;c.sidebarOverlay??=0;c.sidebarBlur??=0;
+ c.workspaceHeaderWash??=defaults().workspaceHeaderWash;c.workspaceHeaderOverlay??=defaults().workspaceHeaderOverlay;c.workspaceHeaderBlur??=defaults().workspaceHeaderBlur;
  if(typeof c.sidebarShared!=='boolean'||!Number.isFinite(c.sidebarOverlay)||c.sidebarOverlay<0||c.sidebarOverlay>100||!Number.isFinite(c.sidebarBlur)||c.sidebarBlur<0||c.sidebarBlur>30)throw Error('共用背景参数无效');
+ if(!color(c.workspaceHeaderWash)||!Number.isFinite(c.workspaceHeaderOverlay)||c.workspaceHeaderOverlay<0||c.workspaceHeaderOverlay>100||!Number.isFinite(c.workspaceHeaderBlur)||c.workspaceHeaderBlur<0||c.workspaceHeaderBlur>30)throw Error('顶部工作空间毛玻璃参数无效');
  if(typeof c.name!=='string'||!c.name.trim()||c.name.length>60)throw Error('名称需要 1–60 个字符');
  if(!['light','dark'].includes(c.mode)||typeof c.sync!=='boolean')throw Error('主题模式无效');
  for(const k of ['ink','muted','accent','sidebarInk','panel','menuBg','menuInk'])if(!color(c[k]))throw Error('颜色无效: '+k);
  const num=(v,a,b)=>typeof v==='number'&&Number.isFinite(v)&&v>=a&&v<=b;
- for(const k of ['panelOpacity','codeOpacity'])if(!num(c[k],0,100))throw Error('透明度无效');
+ for(const k of ['panelOpacity','codeOpacity','replyOpacity','userMessageOpacity'])if(!num(c[k],0,100))throw Error('透明度无效');
  for(const key of ['home','chat','sidebar']){
   const r=c[key]; if(!r||!['solid','gradient','image'].includes(r.type)||!['cover','contain'].includes(r.fit))throw Error('背景类型无效');
   for(const k of ['color','color2','wash'])if(!color(r[k]))throw Error('背景颜色无效');
@@ -92,12 +94,15 @@ export async function makeBundle(input){
  @layer base{${s} button[class~="!text-tertiary"],${s} button[class*="!text-token-input-placeholder-foreground"]{color:${c.sidebarInk}!important;opacity:1!important;}}
  ${s} [role="status"].bg-token-main-surface-primary{background:${c.panel}!important;color:${c.ink}!important;}
  ${s} [role="status"].bg-token-main-surface-primary :is(div,p,span,svg,button){color:${c.ink}!important;}
- ${m}>header,${h} header.app-header-tint{background:${panel}!important;color:${c.ink}!important;}
+ /* The workspace title bar gets its own adjustable frosted-glass surface. */
+ ${m}>header,${h} header.app-header-tint{background:${rgba(c.workspaceHeaderWash,c.workspaceHeaderOverlay/100)}!important;color:${c.ink}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
  ${h} .composer-surface-chrome{background:${panel}!important;border-color:${line}!important;color:${c.ink}!important;}
  ${m} [class*="_ComposerLayoutRoot_"]:has(.ProseMirror[contenteditable="true"]){background:${panel}!important;}
  ${m}:has(.dream-home) [class*="_ComposerLayoutRoot_"]:has(.ProseMirror[contenteditable="true"]){background:transparent!important;}
  ${m}:has(.dream-home) [class*="_ComposerLayoutBody_"]:has(.ProseMirror[contenteditable="true"]){background:${panel}!important;}
  ${h} .composer-surface-chrome :is(textarea,.ProseMirror){color:${c.ink}!important;caret-color:${c.accent};}
+ ${m} [data-markdown-text-style="assistant-message"]{background-color:${rgba(c.panel,c.replyOpacity/100)}!important;border-radius:10px;}
+ ${m} [data-markdown-text-tone="user-message"]{background-color:${rgba(c.panel,c.userMessageOpacity/100)}!important;border-radius:10px;}
  ${h} :is(pre,table,blockquote){background:${rgba(c.panel,c.codeOpacity/100)}!important;border-color:${line}!important;}
  ${h} .sticky.bottom-0>.pointer-events-none.absolute>.bg-gradient-to-t.from-token-main-surface-primary{background-image:none!important;}
  ${m}:not(:has(.dream-home)) .sticky.bottom-0>.pointer-events-none.absolute.inset-x-0.bottom-0.bg-gradient-to-t.from-surface{background-image:none!important;}

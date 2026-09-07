@@ -14,13 +14,13 @@ const english={
  '这是一段用于预览的示例内容。':'Sample content for preview only.','描述你的下一个想法…':'Describe your next idea…','自动':'Auto',
  '◉ 示例预览 · 不读取你的对话':'◉ Sample preview · your chats are never read','实际效果以 Codex 页面为准':'Actual appearance depends on Codex',
  '01 / 选择区域':'01 / PICK A REGION','首页与对话可以拥有不同风景。':'Home and chat can have different looks.','02 / 保持清晰':'02 / KEEP IT CLEAR','增加遮罩强度，让文字更易读。':'Increase the overlay to improve readability.',
- '方案名称':'Look name','与主界面共用背景':'Share the main background','壁纸连续铺满侧栏和主界面。遮罩为 0、模糊为 0 时完全透明；遮罩颜色沿用独立侧栏的遮罩颜色。':'Use one continuous wallpaper across the sidebar and main area. With overlay and blur at 0, it is fully transparent; the sidebar overlay color remains in use.',
+ '方案名称':'Look name','与主界面共用背景':'Share the main background','壁纸连续铺满侧栏和主界面。遮罩为 0、模糊为 0 时完全透明。':'Use one continuous wallpaper across the sidebar and main area. With overlay and blur at 0, it is fully transparent.',
  '跟随首页的全部背景设置':'Use all home background settings','背景类型':'Background type','图片':'Image','纯色':'Solid color','渐变':'Gradient','选择一张喜欢的图片':'Choose an image you love','使用内置图片':'Use built-in image','底色':'Base color','渐变末端':'Gradient end','图片适配':'Image fit','填满画面':'Fill frame','完整显示':'Show whole image','遮罩颜色':'Overlay color','色彩模式':'Color mode','浅色':'Light','深色':'Dark',
  '模式调整控件的明暗表现；文字和背景颜色可分别选择。':'The mode adjusts control contrast; text and background colors are chosen independently.','调整后自动应用到 Codex':'Automatically apply changes to Codex','首次使用请先点「应用到 Codex」。':'For first use, select “Apply to Codex”.','自动应用每次操作结束后合并更新。':'Automatic updates are merged after each adjustment.',
  '随心调整，准备好后再应用。':'Adjust freely, then apply when ready.','导入':'Import','导出':'Export','撤销应用':'Undo apply','保存草稿':'Save draft','应用到 Codex ↗':'Apply to Codex ↗',
- '恢复与运行管理':'Recovery & runtime','连接 Codex（必要时重启）':'Connect Codex (restart if needed)','恢复接管前主题':'Restore pre-studio theme','恢复 Codex 原生外观':'Restore native Codex appearance','停止自动保持':'Stop automatic persistence','验证当前应用':'Verify current apply',
- '关闭窗口后，本地服务继续保持已应用主题。停止自动保持后，页面重载可能清除效果；原生基础配色还原可能需要重开 Codex。':'After this window closes, the local service keeps the applied theme. Stopping persistence may clear it on reload; restoring native colors may require restarting Codex.',
- '水平位置':'Horizontal position','垂直位置':'Vertical position','画面缩放':'Image scale','图片模糊':'Image blur','背景不透明度':'Background opacity','遮罩强度':'Overlay strength','输入框不透明度':'Composer opacity','代码块不透明度':'Code block opacity','顶部菜单栏背景':'Top menu background','顶部菜单栏文字':'Top menu text','主要文字':'Primary text','次要文字':'Secondary text','强调色':'Accent color','侧栏文字':'Sidebar text','输入框 / 代码块':'Composer / code block','侧栏遮罩强度':'Sidebar overlay strength','毛玻璃模糊':'Frosted-glass blur',
+ '恢复与运行管理':'Recovery & runtime','连接 Codex（必要时重启）':'Connect Codex (restart if needed)','恢复接管前主题':'Restore pre-studio theme','恢复 Codex 原生外观':'Restore native Codex appearance','启用开机恢复':'Enable sign-in recovery','禁用开机恢复':'Disable sign-in recovery','停止自动保持':'Stop automatic persistence','验证当前应用':'Verify current apply',
+ '正在检查开机恢复状态…':'Checking sign-in recovery…','开机恢复：已启用':'Sign-in recovery: enabled','开机恢复：未启用':'Sign-in recovery: disabled','已启用开机恢复；登录后会恢复当前已应用的方案。':'Sign-in recovery enabled. Your current applied look will be restored after sign-in.','已禁用开机恢复；当前会话不受影响。':'Sign-in recovery disabled. Your current session is unaffected.','开机恢复会在当前 Windows 用户登录后启动本地服务，并在下次打开 Codex 时恢复已应用的方案。停止自动保持会暂停主题恢复；禁用开机恢复还会删除 Windows 登录启动项。':'Sign-in recovery starts the local service after this Windows user signs in, then restores the applied look when Codex next opens. Stopping persistence pauses theme recovery; disabling sign-in recovery also removes the Windows startup entry.',
+ '水平位置':'Horizontal position','垂直位置':'Vertical position','画面缩放':'Image scale','图片模糊':'Image blur','背景不透明度':'Background opacity','遮罩强度':'Overlay strength','输入框不透明度':'Composer opacity','代码块不透明度':'Code block opacity','回复背景不透明度':'Reply background opacity','用户消息背景不透明度':'User message background opacity','顶部菜单栏背景':'Top menu background','顶部菜单栏文字':'Top menu text','主要文字':'Primary text','次要文字':'Secondary text','强调色':'Accent color','侧栏文字':'Sidebar text','输入框 / 代码块 / 消息':'Composer / code block / messages','侧栏遮罩颜色':'Sidebar overlay color','侧栏遮罩强度':'Sidebar overlay strength','毛玻璃模糊':'Frosted-glass blur','顶部工作空间':'WORKSPACE HEADER','单独调整“我的工作空间”标题栏的遮罩和毛玻璃效果。':'Independently adjust the overlay and frosted-glass effect for the “My workspace” title bar.','顶部工作空间遮罩颜色':'Workspace header overlay color','顶部工作空间遮罩强度':'Workspace header overlay strength','顶部工作空间毛玻璃模糊':'Workspace header frosted-glass blur',
  '预览已更新 · 尚未应用':'Preview updated · not applied yet','正在应用并验证…':'Applying and verifying…','已应用到 Codex · 版本 ':'Applied to Codex · version ','请先点击「应用到 Codex」，之后滑块会自动更新。':'Select “Apply to Codex” first; sliders will then update automatically.','图片不能超过 6MB':'Image cannot exceed 6 MB','图片读取失败':'Could not read image','图片无法解码':'Could not decode image','当前页面不兼容':'Current page is incompatible','Codex 已连接':'Codex connected','Codex 未连接':'Codex not connected','正在连接 Codex，必要时会重新启动应用…':'Connecting Codex; the app may restart if needed…','连接检测完成，请点击应用。':'Connection check complete. Select Apply.','草稿已保存到 D:\\Codex_Background\\data':'Draft saved to D:\\Codex_Background\\data','已撤销上一次应用。':'Last apply undone.','已收藏当前方案。':'Current look saved.','请先选择一个自定义预设':'Choose a custom preset first','自定义预设已删除。':'Custom preset deleted.','预设已载入预览，点击应用后生效。':'Preset loaded into preview. Select Apply to use it.','文件过大':'File is too large','方案已导入预览，点击应用后生效。':'Look imported into preview. Select Apply to use it.','已导出主题包及可编辑 JSON：':'Theme package and editable JSON exported:','当前页面验证通过。':'Current page verification passed.','验证发现问题，请检查页面兼容性。':'Verification found an issue. Check page compatibility.'
 };
 const chinese=Object.fromEntries(Object.entries(english).map(([zh,en])=>[en,zh]));
@@ -40,20 +40,25 @@ const clone=v=>structuredClone(v);
 function slider(id,label,min,max,step=1,unit='%'){return `<label class="slider"><div><span>${label}</span><output id="${id}Value"></output></div><input aria-label="${label}" id="${id}" type="range" min="${min}" max="${max}" step="${step}" data-unit="${unit}"></label>`;}
 $('imageSliders').innerHTML=slider('x','水平位置',0,100)+slider('y','垂直位置',0,100)+slider('zoom','画面缩放',100,180)+slider('blur','图片模糊',0,30,1,'px');
 $('washSliders').innerHTML=slider('opacity','背景不透明度',0,100)+slider('washOpacity','遮罩强度',0,100);
-$('globalSliders').innerHTML=slider('panelOpacity','输入框不透明度',0,100)+slider('codeOpacity','代码块不透明度',0,100);
-for(const [id,label]of Object.entries({menuBg:'顶部菜单栏背景',menuInk:'顶部菜单栏文字',ink:'主要文字',muted:'次要文字',accent:'强调色',sidebarInk:'侧栏文字',panel:'输入框 / 代码块'})){$('globalColors').insertAdjacentHTML('beforeend',`<div class="color-row"><label>${label}<input aria-label="${label}" id="${id}" type="color"></label></div>`);}
+$('globalSliders').innerHTML=slider('panelOpacity','输入框不透明度',0,100)+slider('codeOpacity','代码块不透明度',0,100)+slider('replyOpacity','回复背景不透明度',0,100)+slider('userMessageOpacity','用户消息背景不透明度',0,100);
+for(const [id,label]of Object.entries({menuBg:'顶部菜单栏背景',menuInk:'顶部菜单栏文字',ink:'主要文字',muted:'次要文字',accent:'强调色',sidebarInk:'侧栏文字',panel:'输入框 / 代码块 / 消息'})){$('globalColors').insertAdjacentHTML('beforeend',`<div class="color-row"><label>${label}<input aria-label="${label}" id="${id}" type="color"></label></div>`);}
 $('sharedSliders').innerHTML=slider('sidebarOverlay','侧栏遮罩强度',0,100)+slider('sidebarBlur','毛玻璃模糊',0,30,1,'px');
+$('workspaceHeaderSliders').innerHTML=slider('workspaceHeaderOverlay','顶部工作空间遮罩强度',0,100)+slider('workspaceHeaderBlur','顶部工作空间毛玻璃模糊',0,30,1,'px');
 $('sidebarShared').onchange=()=>{config.sidebarShared=$('sidebarShared').checked;changed();};
+$('sidebarWash').oninput=()=>{config.sidebar.wash=$('sidebarWash').value;changed();};
 for(const k of ['sidebarOverlay','sidebarBlur'])$(k).oninput=()=>{config[k]=Number($(k).value);changed();};
+$('workspaceHeaderWash').oninput=()=>{config.workspaceHeaderWash=$('workspaceHeaderWash').value;changed();};
+for(const k of ['workspaceHeaderOverlay','workspaceHeaderBlur'])$(k).oninput=()=>{config[k]=Number($(k).value);changed();};
 function fill(){
- config.sidebarShared??=false;config.sidebarOverlay??=0;config.sidebarBlur??=0;
- $('sidebarShared').checked=config.sidebarShared;$('sidebarOverlay').value=config.sidebarOverlay;$('sidebarBlur').value=config.sidebarBlur;
+ config.userMessageOpacity??=0;config.replyOpacity??=0;config.sidebarShared??=false;config.sidebarOverlay??=0;config.sidebarBlur??=0;config.workspaceHeaderWash??=base.workspaceHeaderWash;config.workspaceHeaderOverlay??=base.workspaceHeaderOverlay;config.workspaceHeaderBlur??=base.workspaceHeaderBlur;
+ $('sidebarShared').checked=config.sidebarShared;$('sidebarWash').value=config.sidebar.wash;$('sidebarOverlay').value=config.sidebarOverlay;$('sidebarBlur').value=config.sidebarBlur;
+ $('workspaceHeaderWash').value=config.workspaceHeaderWash;$('workspaceHeaderOverlay').value=config.workspaceHeaderOverlay;$('workspaceHeaderBlur').value=config.workspaceHeaderBlur;
  $('sharedWrap').hidden=region!=='sidebar';
  config.menuBg??=base.menuBg;config.menuInk??=base.menuInk;
  $('name').value=config.name;$('sync').checked=config.sync;
  $('regionControls').hidden=region==='global';$('globalControls').hidden=region!=='global';$('syncWrap').hidden=region!=='chat';
  const r=region==='global'?config:config[region];
- for(const k of region==='global'?['mode','menuBg','menuInk','ink','muted','accent','sidebarInk','panel','panelOpacity','codeOpacity']:['type','color','color2','fit','x','y','zoom','blur','wash','opacity','washOpacity'])$(k).value=r[k];
+ for(const k of region==='global'?['mode','menuBg','menuInk','ink','muted','accent','sidebarInk','panel','panelOpacity','codeOpacity','replyOpacity','userMessageOpacity']:['type','color','color2','fit','x','y','zoom','blur','wash','opacity','washOpacity'])$(k).value=r[k];
  $('controlTitle').textContent={home:'首页背景',chat:'对话背景',sidebar:'侧栏背景',global:'配色与面板'}[region];
  document.querySelectorAll('#regions button').forEach(b=>b.classList.toggle('selected',b.dataset.region===region));
  visibility();preview();
@@ -76,7 +81,9 @@ function preview(){
  $('mockSidebar').style.color=config.sidebarInk;$('mockMain').style.color=config.ink;
  $('sampleHome').hidden=page!=='home';$('sampleChat').hidden=page!=='chat';
  document.querySelectorAll('#previewTabs button').forEach(b=>b.classList.toggle('selected',b.dataset.page===page));
- const panel=rgba(config.panel,config.panelOpacity/100);document.querySelector('.mock-header').style.background=panel;document.querySelector('.mock-composer').style.background=panel;
+ document.querySelector('.user-bubble').style.backgroundColor=rgba(config.panel,config.userMessageOpacity/100);
+ $('sampleReply').style.backgroundColor=rgba(config.panel,config.replyOpacity/100);
+ const panel=rgba(config.panel,config.panelOpacity/100),header=document.querySelector('.mock-header');header.style.background=rgba(config.workspaceHeaderWash,config.workspaceHeaderOverlay/100);header.style.backdropFilter=`blur(${config.workspaceHeaderBlur}px)`;header.style.webkitBackdropFilter=`blur(${config.workspaceHeaderBlur}px)`;document.querySelector('.mock-composer').style.background=panel;
  document.querySelector('.mock-composer b').style.background=config.accent;document.querySelector('.mock-composer b').style.color=config.panel;document.querySelector('pre').style.background=rgba(config.panel,config.codeOpacity/100);
 }
 function changed(){visibility();preview();say('预览已更新 · 尚未应用');if($('live').checked&&hasApplied){clearTimeout(timer);timer=setTimeout(applyNow,650);}}
@@ -87,16 +94,18 @@ async function applyNow(){
  finally{applying=false;$('apply').disabled=false;if(pending){pending=false;applyNow();}}
 }
 for(const k of ['type','color','color2','fit','x','y','zoom','blur','wash','opacity','washOpacity'])$(k).addEventListener('input',()=>{config[region][k]=$(k).type==='range'?Number($(k).value):$(k).value;changed();});
-for(const k of ['mode','menuBg','menuInk','ink','muted','accent','sidebarInk','panel','panelOpacity','codeOpacity'])$(k).addEventListener('input',()=>{config[k]=$(k).type==='range'?Number($(k).value):$(k).value;changed();});
+for(const k of ['mode','menuBg','menuInk','ink','muted','accent','sidebarInk','panel','panelOpacity','codeOpacity','replyOpacity','userMessageOpacity'])$(k).addEventListener('input',()=>{config[k]=$(k).type==='range'?Number($(k).value):$(k).value;changed();});
 $('name').oninput=()=>{config.name=$('name').value;changed();};$('sync').onchange=()=>{config.sync=$('sync').checked;changed();};
 $('regions').onclick=e=>{const b=e.target.closest('button');if(!b)return;region=b.dataset.region;if(region==='home'||region==='chat')page=region;fill();};
 $('previewTabs').onclick=e=>{const b=e.target.closest('button');if(b){page=b.dataset.page;preview();}};
 $('imageFile').onchange=()=>run(async()=>{const file=$('imageFile').files[0];if(!file)return;if(file.size>6*1024*1024)throw Error('图片不能超过 6MB');const targetRegion=region;const reader=new FileReader();const data=await new Promise((resolve,reject)=>{reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('图片读取失败'));reader.readAsDataURL(file);});await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(Error('图片无法解码'));image.src=data;});config[targetRegion].image=data;$('imageFile').value='';changed();});
 $('resetImage').onclick=()=>{config[region].image=null;changed();};
-async function check(){const s=await api('status');$('connection').textContent=t(s.connected?(s.compatible?'Codex 已连接':'当前页面不兼容'):'Codex 未连接');$('dot').style.background=s.connected&&s.compatible?'#5b967c':'#c9a367';$('connection').title=s.lastError||'';return s;}
+async function check(){const s=await api('status');$('connection').textContent=t(s.connected?(s.compatible?'Codex 已连接':'当前页面不兼容'):'Codex 未连接');$('dot').style.background=s.connected&&s.compatible?'#5b967c':'#c9a367';$('connection').title=s.lastError||'';$('autoStartStatus').textContent=t(s.autoStart?.enabled?'开机恢复：已启用':'开机恢复：未启用');$('enableAutoStart').disabled=Boolean(s.autoStart?.enabled);$('disableAutoStart').disabled=!s.autoStart?.enabled;return s;}
 $('check').onclick=()=>run(check);$('apply').onclick=()=>{clearTimeout(timer);applyNow();};$('live').onchange=()=>{if($('live').checked&&!hasApplied)say('请先点击「应用到 Codex」，之后滑块会自动更新。');};
 $('language').onchange=()=>{locale=$('language').value;localStorage.setItem('background-studio-language',locale);fill();translatePage();};
 $('connect').onclick=()=>run(async()=>{say('正在连接 Codex，必要时会重新启动应用…');await api('connect');await check();say('连接检测完成，请点击应用。');});
+$('enableAutoStart').onclick=()=>run(async()=>{await api('autostart-enable');await check();say('已启用开机恢复；登录后会恢复当前已应用的方案。');});
+$('disableAutoStart').onclick=()=>run(async()=>{await api('autostart-disable');await check();say('已禁用开机恢复；当前会话不受影响。');});
 $('save').onclick=()=>run(async()=>{await api('save',{config});say('草稿已保存到 D:\\Codex_Background\\data');});
 function cancelLive(){clearTimeout(timer);pending=false;$('live').checked=false;}
 $('undo').onclick=()=>run(async()=>{cancelLive();await api('undo');config=(await api('config')).config;fill();say('已撤销上一次应用。');});

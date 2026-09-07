@@ -5,16 +5,35 @@ import crypto from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {ROOT,defaults,validate,makeBundle} from './engine.mjs';
-import {getAdapter,probeApp,applyTheme,verifyTheme,watchTheme,resolveThemeTarget,restoreSkin,launchApp} from './core/src/index.mjs';
+import {getAdapter,probeApp,applyTheme,verifyTheme,watchTheme,resolveThemeTarget,restoreSkin,launchApp,findRunningPids} from './core/src/index.mjs';
 const exec=promisify(execFile),adapter=getAdapter('codex'),port=9335,HTTP_PORT=47831,token=crypto.randomBytes(32).toString('hex');
 const data=path.join(ROOT,'data');await fs.mkdir(data,{recursive:true});
+const autoStartScript=path.join(ROOT,'EnableBackgroundAutoStart.ps1'),disableAutoStartScript=path.join(ROOT,'DisableBackgroundAutoStart.ps1');
 const read=async(name,fallback)=>{try{return JSON.parse(await fs.readFile(path.join(data,name),'utf8'));}catch(e){if(e.code==='ENOENT')return fallback;throw e;}};
 const write=async(name,value)=>{const dest=path.join(data,name);await fs.writeFile(dest+'.tmp',JSON.stringify(value,null,2));await fs.rename(dest+'.tmp',dest);};
 let config=validate(await read('config.json',defaults())),active=await read('active.json',null),previous=await read('previous.json',null),enabled=await read('enabled.json',false),watch=null,watchDone=null,lastError=null,chain=Promise.resolve();
 let activeConfig=await read('active-config.json',config);
+let reconnecting=false,lastReconnectAttempt=0;
 const serial=fn=>{const job=chain.then(fn);chain=job.catch(()=>{});return job;};
 async function stopWatch(){if(watch){watch.abort();await watchDone;watch=null;watchDone=null;}}
 async function startWatch(bundle){await stopWatch();const ctrl=new AbortController();watch=ctrl;watchDone=watchTheme({adapter,targetTheme:resolveThemeTarget(bundle,'codex'),port,signal:ctrl.signal,onEvent:e=>{if(e.type==='error')lastError=e.message;else if(e.type==='injected')lastError=null;}}).catch(e=>{lastError=e.message;});}
+async function autoStartStatus(){
+ try{
+  const {stdout}=await exec('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',autoStartScript,'-CheckOnly'],{windowsHide:true});
+  return {enabled:Boolean(JSON.parse(stdout).enabled)};
+ }catch(e){return {enabled:false,error:e.message};}
+}
+async function maintainRestartPersistence(){
+ if(!enabled||!active||reconnecting||Date.now()-lastReconnectAttempt<120000)return;
+ try{
+  if(!(await findRunningPids(adapter)).length)return;
+  try{await probeApp({adapter,port,timeoutMs:1200});return;}catch{}
+  reconnecting=true;lastReconnectAttempt=Date.now();
+  await launchApp({adapter,port,restartExisting:true,timeoutMs:30000});
+  lastError=null;
+ }catch(e){lastError=e.message;}
+ finally{reconnecting=false;}
+}
 async function apply(bundle,nextConfig){
  const targetTheme=resolveThemeTarget(bundle,'codex');
  const checks=await probeApp({adapter,targetTheme,port,timeoutMs:2500});
@@ -32,7 +51,7 @@ async function apply(bundle,nextConfig){
  }catch(e){if(old){try{await applyTheme({adapter,targetTheme:resolveThemeTarget(old,'codex'),port,timeoutMs:5000});await startWatch(old);}catch(re){e.message+='；回退失败：'+re.message;}}throw e;}
 }
 async function body(req){let n=0,parts=[];for await(const b of req){n+=b.length;if(n>28*1024*1024)throw Error('数据超过 28MB');parts.push(b);}return JSON.parse(Buffer.concat(parts).toString()||'{}');}
-async function status(){try{const checks=await probeApp({adapter,port,timeoutMs:1400});return {connected:true,compatible:checks.some(x=>x.result?.compatible),enabled,theme:active?.theme||null,lastError};}catch(e){return {connected:false,compatible:false,enabled,lastError:e.message};}}
+async function status(){const autoStart=await autoStartStatus();try{const checks=await probeApp({adapter,port,timeoutMs:1400});return {connected:true,compatible:checks.some(x=>x.result?.compatible),enabled,autoStart,theme:active?.theme||null,lastError};}catch(e){return {connected:false,compatible:false,enabled,autoStart,lastError:e.message};}}
 async function api(route,b){
  switch(route){
  case '/api/status':return status();
@@ -43,6 +62,16 @@ async function api(route,b){
  case '/api/undo':{if(!previous?.bundle)throw Error('暂无可撤销的应用');const p=previous;return apply(p.bundle,p.config);}
  case '/api/original':{const old=await read('before-studio.codedrobe-theme',await read('original.codedrobe-theme',null));return apply(old,defaults());}
  case '/api/restore':{await stopWatch();enabled=false;await write('enabled.json',false);await exec('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',path.join(ROOT,'app/legacy.ps1'),'-BackupPath',path.join(data,'before-studio.codedrobe-theme')],{windowsHide:true});const result=await restoreSkin({adapter,port,timeoutMs:2500});return {ok:result.renderer.restored,result,message:result.host?.changed?'基础配色已还原，请完全退出并重开 Codex 后检查。':'已移除主题层。'};}
+ case '/api/autostart-enable':{
+  if(!active)throw Error('请先应用一个背景方案，再启用开机恢复。');
+  await exec('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',autoStartScript],{windowsHide:true});
+  enabled=true;await write('enabled.json',true);await startWatch(active);
+  return {ok:true,autoStart:await autoStartStatus()};
+ }
+ case '/api/autostart-disable':{
+  await exec('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',disableAutoStartScript],{windowsHide:true});
+  return {ok:true,autoStart:await autoStartStatus()};
+ }
  case '/api/preset':{const c=validate(b.config),ps=await read('presets.json',[]),id=crypto.randomUUID();ps.push({id,name:c.name,config:c});await write('presets.json',ps);return {ok:true,presets:ps};}
  case '/api/delete-preset':{const ps=(await read('presets.json',[])).filter(x=>x.id!==b.id);await write('presets.json',ps);return {ok:true,presets:ps};}
  case '/api/import':{const c=validate(b.value.studioConfig||b.value);return {ok:true,config:c};}
@@ -70,4 +99,4 @@ const server=http.createServer(async(req,res)=>{
  }catch(e){res.writeHead(400,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify({error:e.message}));}
 });
 server.on('error',e=>{console.error(e.message);process.exit(1);});
-server.listen(HTTP_PORT,'127.0.0.1',async()=>{await write('server.json',{pid:process.pid,port:HTTP_PORT,root:ROOT});console.log('Background Studio http://127.0.0.1:'+HTTP_PORT);if(enabled&&active)await startWatch(active);});
+server.listen(HTTP_PORT,'127.0.0.1',async()=>{await write('server.json',{pid:process.pid,port:HTTP_PORT,root:ROOT});console.log('Background Studio http://127.0.0.1:'+HTTP_PORT);if(enabled&&active)await startWatch(active);const timer=setInterval(()=>maintainRestartPersistence(),5000);timer.unref();});

@@ -9,10 +9,12 @@ The interface defaults to English and includes an in-app English / Chinese langu
 - Independently configure home, chat, sidebar, and panel appearances.
 - Use a solid color, gradient, or PNG/JPEG/WebP image (up to 6 MB).
 - Adjust image position, zoom, blur, opacity, and overlay strength.
+- Independently adjust the workspace title bar’s overlay color, strength, and frosted-glass blur.
 - Share a continuous background between the main content and sidebar.
 - Preview changes locally before applying them to Codex.
 - Save, import, export, and switch between local looks.
 - Apply a theme with validation and retain the active theme through the local service.
+- Restore the last theme applied by this app after Windows sign-in and the next Codex launch.
 
 ## Requirements
 
@@ -27,6 +29,8 @@ node .\app\server.mjs
 ```
 
 Open [http://127.0.0.1:47831](http://127.0.0.1:47831) in a browser. The app only listens on the loopback interface.
+
+To restore the most recently applied background after a Windows sign-in, apply a look first, then select **Enable sign-in recovery** under **Recovery & runtime**. This creates a startup entry for the current Windows user only; it does not require administrator privileges or modify Codex files. Select **Disable sign-in recovery** (or run `DisableBackgroundAutoStart.ps1`) to remove that entry. If you move the application folder, disable and re-enable recovery so the startup entry points to the new location.
 
 ## Safety and privacy
 
@@ -62,10 +66,12 @@ Codex Background Studio 是一款 Windows 本地编辑器，用于配置 Codex �
 - 分别配置首页、对话、侧栏和面板外观。
 - 支持纯色、渐变或 PNG/JPEG/WebP 图片（最大 6 MB）。
 - 调节图片位置、缩放、模糊、透明度和遮罩强度。
+- 单独调节工作空间顶部标题栏的遮罩颜色、强度和毛玻璃模糊。
 - 让主内容区和侧栏共用连续背景。
 - 在应用到 Codex 前先进行本地预览。
 - 在本机保存、导入、导出和切换方案。
 - 应用主题时执行验证，并由本地服务保持当前主题。
+- Windows 登录后自动启动本地服务，并在下次打开 Codex 时恢复本 App 最后应用的主题。
 
 ## 运行要求
 
@@ -80,6 +86,8 @@ node .\app\server.mjs
 ```
 
 在浏览器中打开 [http://127.0.0.1:47831](http://127.0.0.1:47831)。应用仅监听本机回环地址。
+
+如需在 Windows 登录后恢复最近一次已应用的背景，请先应用方案，再在“恢复与运行管理”中点击“启用开机恢复”。它仅为当前 Windows 用户创建登录启动项，无需管理员权限，也不会修改 Codex 文件。可点击“禁用开机恢复”（或运行 `DisableBackgroundAutoStart.ps1`）移除该启动项。若移动应用文件夹，请先禁用再重新启用，以更新启动路径。
 
 ## 隐私与安全
 
