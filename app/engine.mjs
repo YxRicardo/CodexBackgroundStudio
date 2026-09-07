@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {validateThemePackage} from './core/src/index.mjs';
 import {isValidBase64} from './core/src/theme/base64.mjs';
 export const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-export const region=()=>({type:'image',color:'#eef7ff',color2:'#dcecff',image:null,opacity:100,wash:'#eef7ff',washOpacity:65,blur:0,x:80,y:50,fit:'cover',zoom:100});
+export const region=()=>({type:'gradient',color:'#eef7ff',color2:'#dcecff',image:null,opacity:100,wash:'#eef7ff',washOpacity:65,blur:0,x:80,y:50,fit:'cover',zoom:100});
 export const defaults=()=>({schema:1,name:'Azure glow',mode:'light',menuBg:'#98bce2',menuInk:'#203653',ink:'#203653',muted:'#576c85',accent:'#6e60b7',sidebarInk:'#e5f4ff',panel:'#f8fcff',panelOpacity:94,codeOpacity:92,replyOpacity:0,userMessageOpacity:0,workspaceHeaderWash:'#f8fcff',workspaceHeaderOverlay:84,workspaceHeaderBlur:18,sync:true,home:region(),chat:{...region(),washOpacity:80},sidebar:{...region(),type:'gradient',color:'#193657',color2:'#122743',wash:'#142a49',washOpacity:35}});
 const color=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);
 export function validate(c){
@@ -46,10 +46,11 @@ export function regionCSS(selector,r,imageId){
  ${selector}::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:${rgba(r.wash,r.washOpacity/100)};}`;
 }
 export async function makeBundle(input){
- const c=validate(input), images={}, hero=await fs.readFile(path.join(ROOT,'app/template/assets/hero.png'));
+ const c=validate(input), images={};
  for(const k of ['home','chat','sidebar']){
   const r=k==='chat'&&c.sync?c.home:c[k];
-  const data=r.image||`data:image/png;base64,${hero.toString('base64')}`;
+  if(!r.image)continue;
+  const data=r.image;
   const [,mime,base64]=data.match(/^data:([^;]+);base64,(.*)$/s);
   images[k]={filename:k+'.'+({ 'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[mime]),mimeType:mime,base64};
  }
@@ -118,5 +119,7 @@ export async function makeBundle(input){
  ${m}:not(:has(.dream-home)) .sticky.bottom-0>.pointer-events-none.absolute.inset-x-0.bottom-0.bg-gradient-to-t.from-surface{background-image:none!important;}
  #codedrobe-codex-skin-chrome{display:none!important;pointer-events:none!important;}
  ${shared}`;
- return validateThemePackage({format:'codedrobe-theme',schemaVersion:1,theme:{id:'codex-background-studio',displayName:c.name,version:`1.0.${Date.now()}`},assets:{images},targets:{codex:{css,options:{rendererProfile:'codex-theme-v1'}}}});
+ const bundle={format:'codedrobe-theme',schemaVersion:1,theme:{id:'codex-background-studio',displayName:c.name,version:`1.0.${Date.now()}`},targets:{codex:{css,options:{rendererProfile:'codex-theme-v1'}}}};
+ if(Object.keys(images).length)bundle.assets={images};
+ return validateThemePackage(bundle);
 }

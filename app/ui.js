@@ -70,7 +70,12 @@ function visibility(){
  document.querySelectorAll('input[type=range]').forEach(i=>$(i.id+'Value').textContent=i.value+i.dataset.unit);
 }
 const rgba=(c,a)=>`rgba(${[1,3,5].map(n=>parseInt(c.slice(n,n+2),16)).join(',')},${a})`;
-function paint(el,r){el.style.background=r.color;const art=el.querySelector('.art');Object.assign(art.style,{backgroundColor:r.color,backgroundImage:r.type==='image'?`url("${r.image||'/hero.png'}")`:r.type==='gradient'?`linear-gradient(155deg,${r.color},${r.color2})`:'none',backgroundSize:r.fit,backgroundPosition:`${r.x}% ${r.y}%`,backgroundRepeat:'no-repeat',opacity:r.opacity/100,filter:`blur(${r.blur}px)`,transform:`scale(${r.zoom/100})`});el.querySelector('.wash').style.background=rgba(r.wash,r.washOpacity/100);}
+const paint=(el,r)=>{
+ el.style.background=r.color;const art=el.querySelector('.art');
+ let image='none';if(r.type==='gradient')image='linear-gradient(155deg,'+r.color+','+r.color2+')';else if(r.type==='image'&&r.image)image='url("'+r.image+'")';
+ Object.assign(art.style,{backgroundColor:r.color,backgroundImage:image,backgroundSize:r.fit,backgroundPosition:r.x+'% '+r.y+'%',backgroundRepeat:'no-repeat',opacity:r.opacity/100,filter:'blur('+r.blur+'px)',transform:'scale('+(r.zoom/100)+')'});
+ el.querySelector('.wash').style.background=rgba(r.wash,r.washOpacity/100);
+};
 function preview(){
  $('menuPreview').style.background=config.menuBg;$('menuPreview').style.color=config.menuInk;
  const mainRegion=page==='home'||config.sync?config.home:config.chat;

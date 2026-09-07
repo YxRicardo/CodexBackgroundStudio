@@ -92,7 +92,6 @@ const server=http.createServer(async(req,res)=>{
    res.setHeader('Content-Type','application/json; charset=utf-8');return res.end(JSON.stringify(result));
   }
   const files={'/':'index.html','/ui.js':'ui.js','/style.css':'style.css','/api-client.mjs':'api-client.mjs'};
-  if(url.pathname==='/hero.png'){res.setHeader('Content-Type','image/png');return res.end(await fs.readFile(path.join(ROOT,'app/template/assets/hero.png')));}
   if(!files[url.pathname]){res.writeHead(404);return res.end();}
   const file=files[url.pathname];res.setHeader('Content-Type',file.endsWith('.css')?'text/css':/\.m?js$/.test(file)?'text/javascript':'text/html; charset=utf-8');
   let content=await fs.readFile(path.join(ROOT,'app',file),'utf8');if(file==='index.html')content=content.replace('__TOKEN__',token);res.end(content);
