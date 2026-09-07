@@ -1,0 +1,17 @@
+# Local application state and private verification materials
+/data/
+/exports/
+/work/
+
+# Bundled/runtime and distributable artifacts (publish source only)
+/runtime/
+/*.exe
+/*.zip
+
+# Local environment files
+.env
+.env.*
+!.env.example
+node_modules/
+npm-debug.log*
+*.log

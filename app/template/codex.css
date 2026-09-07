@@ -1,0 +1,313 @@
+/*
+ * One-Shot Codex Theme
+ * Detailed home selectors are inherited from CodeDrobe's starter and must be
+ * rechecked against a live privacy-safe DOM snapshot after Codex is relaunched
+ * with CDP enabled.
+ */
+:root.codedrobe-host-codex {
+  color-scheme: light !important;
+  --theme-ink: #203653;
+  --theme-ink-soft: #576C85;
+  --theme-ink-wash: rgba(32, 54, 83, .08);
+  --theme-accent: #6e60b7;
+  --theme-accent-deep: #554790;
+  --theme-accent-soft: rgba(110, 96, 183, .12);
+  --theme-secondary: #288b9e;
+  --theme-highlight: #56c4df;
+  --theme-surface: #f0f8ff;
+  --theme-surface-light: #eef7ff;
+  --theme-surface-glass: rgba(238, 247, 255, .88);
+  --theme-line: rgba(64, 99, 137, .18);
+  --theme-shadow: rgba(30, 69, 112, .15);
+
+  --color-token-bg-primary: var(--theme-surface) !important;
+  --color-token-bg-secondary: var(--theme-surface-glass) !important;
+  --color-token-bg-tertiary: rgba(210, 229, 248, .58) !important;
+  --color-token-main-surface-primary: rgba(240, 248, 255, .96) !important;
+  --color-token-side-bar-background: #142a49 !important;
+  --color-token-foreground: var(--theme-ink) !important;
+  --color-token-text-primary: var(--theme-ink) !important;
+  --color-token-text-secondary: var(--theme-ink-soft) !important;
+  --color-token-text-tertiary: rgba(32, 54, 83, .58) !important;
+  --color-token-description-foreground: var(--theme-ink-soft) !important;
+  --color-token-icon-foreground: var(--theme-ink-soft) !important;
+  --color-token-input-background: rgba(248, 252, 255, .95) !important;
+  --color-token-input-foreground: var(--theme-ink) !important;
+  --color-token-input-placeholder-foreground: rgba(32, 54, 83, .48) !important;
+  --color-token-input-border: rgba(75, 111, 152, .25) !important;
+  --color-token-border: var(--theme-line) !important;
+  --color-token-border-default: var(--theme-line) !important;
+  --color-token-border-heavy: rgba(64, 99, 137, .30) !important;
+  --color-token-list-hover-background: rgba(110, 96, 183, .10) !important;
+  --color-token-list-active-selection-background: rgba(110, 96, 183, .18) !important;
+  --color-token-toolbar-hover-background: rgba(110, 96, 183, .11) !important;
+  --color-token-button-background: var(--theme-accent) !important;
+  --color-token-button-foreground: #eef7ff !important;
+  --color-token-button-border: rgba(85, 71, 144, .34) !important;
+  --color-token-link: var(--theme-accent-deep) !important;
+  --color-token-text-link-foreground: var(--theme-accent-deep) !important;
+  --color-token-primary: var(--theme-accent) !important;
+  --color-token-focus-border: rgba(110, 96, 183, .72) !important;
+  --color-token-dropdown-background: rgba(238, 247, 255, .98) !important;
+  --color-token-dropdown-foreground: var(--theme-ink) !important;
+  --color-token-menu-background: rgba(238, 247, 255, .98) !important;
+  --color-token-menu-border: var(--theme-line) !important;
+  --color-token-badge-background: rgba(110, 96, 183, .13) !important;
+  --color-token-badge-foreground: var(--theme-accent-deep) !important;
+  --color-token-scrollbar-slider-background: rgba(75, 111, 152, .24) !important;
+  --color-token-scrollbar-slider-hover-background: rgba(110, 96, 183, .32) !important;
+  --color-token-scrollbar-slider-active-background: rgba(110, 96, 183, .46) !important;
+  --color-token-text-preformat-foreground: #6f271f !important;
+  --color-token-text-preformat-background: rgba(110, 96, 183, .08) !important;
+  --color-token-text-code-block-background: rgba(248, 252, 255, .90) !important;
+}
+
+html.codedrobe-host-codex body {
+  background:
+    radial-gradient(circle at 84% 12%, rgba(110, 96, 183, .08), transparent 24%),
+    linear-gradient(135deg, rgba(238, 247, 255, .96), rgba(235, 220, 193, .90)) !important;
+  color: var(--theme-ink) !important;
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei UI", sans-serif !important;
+}
+
+html.codedrobe-host-codex body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .18;
+  background-image:
+    repeating-linear-gradient(7deg, rgba(80, 61, 40, .10) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(97deg, rgba(255, 255, 255, .18) 0 1px, transparent 1px 11px);
+  mix-blend-mode: multiply;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel {
+  background:
+    radial-gradient(circle at 15% 8%, rgba(110, 96, 183, .25), transparent 24%),
+    linear-gradient(180deg, #193657, #122743) !important;
+  border-right: 1px solid rgba(86, 196, 223, .34) !important;
+  box-shadow: 12px 0 32px rgba(20, 42, 73, .15) !important;
+  color: #e5f4ff !important;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel :is(a, button, div, p, span, svg) {
+  color: #e5f4ff !important;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel :is(a, button) {
+  border-radius: 9px !important;
+  transition: background-color .16s ease, transform .16s ease, box-shadow .16s ease !important;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel :is(a, button):hover {
+  background: linear-gradient(90deg, rgba(110, 96, 183, .54), rgba(110, 96, 183, .18)) !important;
+  box-shadow: inset 3px 0 var(--theme-highlight) !important;
+  transform: none;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel :is([aria-current="page"], [aria-selected="true"]) {
+  background: linear-gradient(90deg, rgba(110, 96, 183, .72), rgba(110, 96, 183, .22)) !important;
+  box-shadow: inset 3px 0 #78cfea, 0 6px 18px rgba(0, 0, 0, .14) !important;
+}
+
+/* Tailwind's !text/!opacity utilities are layered, so this repair must also live in a layer. */
+@layer base {
+  html.codedrobe-host-codex aside.app-shell-left-panel button[class*="!text-token-input-placeholder-foreground"] {
+    --color-token-input-placeholder-foreground: #e5f4ff;
+    --color-token-foreground: #f5fbff;
+    color: rgba(229, 244, 255, .78) !important;
+    opacity: 1 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  html.codedrobe-host-codex aside.app-shell-left-panel button[class*="!text-token-input-placeholder-foreground"]:is(:hover, :focus-visible) {
+    color: #f5fbff !important;
+    background: rgba(86, 196, 223, .16) !important;
+    box-shadow: inset 2px 0 var(--theme-highlight) !important;
+    transform: none !important;
+  }
+}
+
+/* Usage cards live inside the dark sidebar but use a light surface. Keep their own contrast system. */
+html.codedrobe-host-codex aside.app-shell-left-panel [role="status"].bg-token-main-surface-primary {
+  color: var(--theme-ink) !important;
+  background: rgba(245, 250, 255, .98) !important;
+  border-color: rgba(75, 111, 152, .28) !important;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel [role="status"].bg-token-main-surface-primary :is(div, p, span, svg) {
+  color: var(--theme-ink) !important;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel [role="status"].bg-token-main-surface-primary button {
+  color: var(--theme-ink) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel [role="status"].bg-token-main-surface-primary button.bg-token-bg-fog {
+  background: rgba(248, 252, 255, .92) !important;
+  border-color: rgba(75, 111, 152, .30) !important;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel [role="status"].bg-token-main-surface-primary button.bg-token-bg-fog:hover {
+  background: rgba(211, 225, 247, .46) !important;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel [role="status"].bg-token-main-surface-primary button.bg-token-foreground {
+  color: #f5fbff !important;
+  background: var(--theme-ink) !important;
+  border-color: var(--theme-ink) !important;
+}
+
+html.codedrobe-host-codex aside.app-shell-left-panel [role="status"].bg-token-main-surface-primary button.bg-token-foreground:hover {
+  background: #314d6f !important;
+}
+
+html.codedrobe-host-codex main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface']) {
+  position: relative;
+  background:
+    linear-gradient(rgba(240, 248, 255, .94), rgba(234, 244, 255, .96)) !important;
+  border: 1px solid rgba(75, 111, 152, .20) !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-radius: 22px 0 0 !important;
+  box-shadow: -10px 0 32px rgba(30, 69, 112, .10), inset 0 1px rgba(255, 255, 255, .66) !important;
+  overflow: hidden !important;
+}
+
+/* Keep profile chrome decorative and satisfy Core's interaction safety check. */
+#codedrobe-codex-skin-chrome {
+  pointer-events: none !important;
+}
+
+/* Full conversation artwork: cover the canvas so the bitmap edge is not visible. */
+html.codedrobe-host-codex main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface']) { isolation:isolate; }
+html.codedrobe-host-codex main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface'])::before { content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;background:var(--codedrobe-image-hero) right center / cover no-repeat; }
+
+html.codedrobe-host-codex main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface'])::after { content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,rgba(240,248,255,.88),rgba(240,248,255,.76) 58%,rgba(240,248,255,.48)); }
+
+html.codedrobe-host-codex main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface']) > header,
+html.codedrobe-host-codex header.app-header-tint {
+  background: rgba(236, 246, 255, .84) !important;
+  border-bottom: 1px solid rgba(75, 111, 152, .16) !important;
+  color: var(--theme-ink) !important;
+  backdrop-filter: blur(18px) saturate(1.04) !important;
+}
+
+html.codedrobe-host-codex [role="main"] {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+  color: var(--theme-ink) !important;
+  scrollbar-color: rgba(110, 96, 183, .34) transparent;
+}
+
+/* Home uses its own focused hero; do not duplicate the conversation watermark. */
+html.codedrobe-host-codex main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface']):has(.dream-home)::before,
+html.codedrobe-host-codex main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface']):has([data-testid="home-icon"])::before {
+  opacity: 0;
+}
+
+html.codedrobe-host-codex main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface']):has(.dream-home)::after,
+html.codedrobe-host-codex main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface']):has([data-testid="home-icon"])::after {
+  display: none;
+}
+
+html.codedrobe-host-codex .composer-surface-chrome {
+  border: 1px solid rgba(75, 111, 152, .24) !important;
+  border-radius: 18px 18px 8px 18px !important;
+  background: rgba(248, 252, 255, .94) !important;
+  color: var(--theme-ink) !important;
+  box-shadow: 0 18px 28px -18px rgba(30, 69, 112, .28), inset 0 1px rgba(255, 255, 255, .72) !important;
+}
+
+html.codedrobe-codex-skin:not(:has(.dream-home)) .sticky.bottom-0 > .pointer-events-none.absolute > .bg-gradient-to-t.from-token-main-surface-primary {
+  background-image: none !important;
+}
+
+/* Queue messages mount in a separate translucent top tray above the composer.
+   Flatten only that tray's native rounded border; keep its readable surface and controls. */
+html.codedrobe-codex-skin:not(:has(.dream-home)) div:has(> .vertical-scroll-fade-mask.hide-scrollbar.max-h-\[30dvh\]) {
+  border: 0 !important;
+  border-radius: 18px 18px 0 0 !important;
+  box-shadow: none !important;
+}
+
+html.codedrobe-host-codex .composer-surface-chrome:focus-within {
+  border-color: rgba(110, 96, 183, .52) !important;
+  box-shadow: 0 18px 28px -18px rgba(30, 69, 112, .30), 0 0 0 3px rgba(110, 96, 183, .08) !important;
+}
+
+/* The files-changed chip returns focus to the composer. Keep focus visible,
+   but move its halo inside so it does not read as another outer tray. */
+html.codedrobe-codex-skin .sticky.bottom-0:has(.diff-stat-rolling-number) .composer-surface-chrome:focus-within {
+  box-shadow: 0 18px 28px -18px rgba(30, 69, 112, .30), inset 0 0 0 2px rgba(110, 96, 183, .18) !important;
+}
+
+html.codedrobe-host-codex .composer-surface-chrome :is(textarea, .ProseMirror, [contenteditable="true"]) {
+  color: var(--theme-ink) !important;
+  caret-color: var(--theme-accent) !important;
+}
+
+html.codedrobe-host-codex :is(article, [data-message-author-role]) {
+  color: var(--theme-ink) !important;
+}
+
+html.codedrobe-host-codex :is(pre, table, blockquote) {
+  border: 1px solid rgba(75, 111, 152, .18) !important;
+  border-radius: 11px !important;
+  background: rgba(248, 252, 255, .78) !important;
+}
+
+html.codedrobe-host-codex blockquote {
+  border-left: 3px solid var(--theme-accent) !important;
+}
+
+html.codedrobe-host-codex pre {
+  overflow: auto !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .68) !important;
+}
+
+html.codedrobe-host-codex :is(a, button, input, textarea, [contenteditable="true"]) {
+  accent-color: var(--theme-accent);
+}
+
+html.codedrobe-host-codex * {
+  scrollbar-color: rgba(110, 96, 183, .34) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.codedrobe-host-codex *,
+  html.codedrobe-host-codex *::before,
+  html.codedrobe-host-codex *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* Codex 26.901: native home container, zero changes to composer/project geometry. */
+html.codedrobe-host-codex .dream-home { isolation:isolate; }
+html.codedrobe-host-codex .dream-home::before {
+ content:"";position:absolute;inset:0;min-height:250px;z-index:-1;pointer-events:none;
+ background-image:linear-gradient(90deg,rgba(238,247,255,.66),rgba(238,247,255,.32) 52%,rgba(238,247,255,.08)),var(--codedrobe-image-hero);
+ background-size:cover; background-position:right center;background-repeat:no-repeat;
+}
+html.codedrobe-host-codex .dream-home [data-feature="game-source"] { color:#203653!important; }
+html.codedrobe-host-codex .dream-home [data-feature="game-source"]::after {
+ content:"";
+}
+html.codedrobe-host-codex #codedrobe-codex-skin-chrome { display:none!important;pointer-events:none!important; }
+
+@layer base {
+ html.codedrobe-host-codex aside.app-shell-left-panel button[class~="!text-tertiary"] {
+  --color-text-tertiary:#c4dbee;--color-text:#f5fbff;
+  color:#c4dbee!important;opacity:1!important;transform:none!important;box-shadow:none!important;background:transparent!important;
+ }
+ html.codedrobe-host-codex aside.app-shell-left-panel button[class~="!text-tertiary"]:is(:hover,:focus-visible){color:#ffffff!important;background:rgba(86,196,223,.12)!important;}
+}
