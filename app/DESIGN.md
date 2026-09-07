@@ -14,4 +14,8 @@ Scheduled tasks and Plugins share a sticky search tray. Its native opaque surfac
 
 Private screenshot evidence and layout verification are stored under work and are excluded from release archives.
 
+User-message background opacity applies to the native `.bg-user-message` bubble, preserving its padding and rounded corners. The inner Markdown background is transparent so the message has a single background layer, including at zero opacity.
+
 1.0.6: Optional shared wallpaper uses the common shell with a direct sidebar child and descendant main. Paint artwork once behind both regions; disable their local artwork only when enabled. Home detection selects home settings, otherwise chat settings. Sidebar uses only an optional color overlay and backdrop blur. Native content structure remains unchanged.
+
+1.0.7: Scope the workspace-header glass fallback to the main content surface, then apply the glass to the header's flexible workspace section instead of the full fixed header. The fixed header also spans an open details sidebar; leaving it unfiltered keeps sidebar controls such as Enter fullscreen crisp.

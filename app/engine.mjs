@@ -97,8 +97,11 @@ export async function makeBundle(input){
  @layer base{${s} button[class~="!text-tertiary"],${s} button[class*="!text-token-input-placeholder-foreground"]{color:${c.sidebarInk}!important;opacity:1!important;}}
  ${s} [role="status"].bg-token-main-surface-primary{background:${c.panel}!important;color:${c.ink}!important;}
  ${s} [role="status"].bg-token-main-surface-primary :is(div,p,span,svg,button){color:${c.ink}!important;}
- /* The workspace title bar gets its own adjustable frosted-glass surface. */
- ${m}>header,${h} header.app-header-tint{background:${rgba(c.workspaceHeaderWash,c.workspaceHeaderOverlay/100)}!important;color:${c.ink}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
+ /* The fixed header spans both the workspace and an open details sidebar.
+    Put glass on its flexible workspace section only, so controls rendered in
+    the sidebar section (such as Enter fullscreen) remain crisp. */
+ ${m}>header,${m} header.app-header-tint{background:transparent!important;color:${c.ink}!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+ ${m}>header>div[class~="flex-1"],${m} header.app-header-tint>div[class~="flex-1"]{background:${rgba(c.workspaceHeaderWash,c.workspaceHeaderOverlay/100)}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
  ${h} .composer-surface-chrome{background:${panel}!important;border-color:${line}!important;color:${c.ink}!important;}
  ${m} [class*="_ComposerLayoutRoot_"]:has(.ProseMirror[contenteditable="true"]){background:${panel}!important;}
  /* ChatGPT Chat ships an additional nearly-opaque body inside the composer.
@@ -113,7 +116,9 @@ export async function makeBundle(input){
  ${m} div:has(>input.bg-transparent){background:${panel}!important;border-color:${line}!important;}
  ${h} .composer-surface-chrome :is(textarea,.ProseMirror){color:${c.ink}!important;caret-color:${c.accent};}
  ${m} [data-markdown-text-style="assistant-message"]{background-color:${rgba(c.panel,c.replyOpacity/100)}!important;border-radius:10px;}
- ${m} [data-markdown-text-tone="user-message"]{background-color:${rgba(c.panel,c.userMessageOpacity/100)}!important;border-radius:10px;}
+ /* The native bubble owns the only user-message background, including its padding. */
+ ${m} .bg-user-message{background-color:${rgba(c.panel,c.userMessageOpacity/100)}!important;}
+ ${m} [data-markdown-text-tone="user-message"]{background-color:transparent!important;}
  ${h} :is(pre,table,blockquote){background:${rgba(c.panel,c.codeOpacity/100)}!important;border-color:${line}!important;}
  ${h} .sticky.bottom-0>.pointer-events-none.absolute>.bg-gradient-to-t.from-token-main-surface-primary{background-image:none!important;}
  ${m}:not(:has(.dream-home)) .sticky.bottom-0>.pointer-events-none.absolute.inset-x-0.bottom-0.bg-gradient-to-t.from-surface{background-image:none!important;}
