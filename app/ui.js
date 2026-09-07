@@ -1,7 +1,40 @@
 import {createApiClient} from './api-client.mjs';
+const english={
+ '为你的 Codex，留一片喜欢的风景':'A view you will love, for your Codex.',
+ '正在检查连接…':'Checking connection…','重新检测':'Check again','语言':'Language',
+ '你的工作空间':'YOUR WORKSPACE','调出':'Set','你的氛围。':'the mood.','颜色、光影与画面，':'Color, light, and imagery—','都由你来决定。':'all yours to shape.',
+ '首页背景':'Home background','对话背景':'Chat background','侧栏背景':'Sidebar background','配色与面板':'Colors & panels',
+ '收藏的风景':'SAVED LOOKS','选择预设…':'Choose a preset…','澄蓝浮光':'Azure glow','深海夜色':'Deep sea night','暖纸留白':'Warm paper',
+ '＋ 收藏当前方案':'＋ Save current look','删除选中的自定义预设':'Delete selected custom preset','● 全部保存在本机':'● Stored locally',
+ '先看见，再应用。':'See it before you apply it.','首页':'Home','对话':'Chat','文件　编辑　视图　帮助':'File  Edit  View  Help',
+ '＋ 新任务':'＋ New task','⌕ 搜索':'⌕ Search','▦ 项目':'▦ Projects','最近任务':'RECENT TASKS','我的灵感空间':'My inspiration space','一段新的开始':'A fresh start','探索更多可能':'Explore more',
+ '我的工作空间':'My workspace','◧　←　→　　文件　编辑　视图　帮助':'◧  ←  →    File  Edit  View  Help','＋ \u00a0 自动':'＋ \u00a0 Auto','＋   自动 ↑':'＋   Auto ↑','PNG / JPG / WebP · 最大 6MB':'PNG / JPG / WebP · max 6 MB','顶部菜单栏颜色预览':'Top menu color preview',
+ '今天，想创造些什么？':'What would you like to create today?','让灵感从这里开始。':'Start where inspiration strikes.','写一个小工具':'Build a small tool','探索一个想法':'Explore an idea',
+ '让工作空间变得更舒服。':'Make this workspace more comfortable.','从你喜欢的颜色开始':'Start with colors you love','选择一张图片，留一点光。':'Choose an image. Let in some light.','清晰的文字，也可以和风景共存。':'Clear text can live with a great view.',
+ '这是一段用于预览的示例内容。':'Sample content for preview only.','描述你的下一个想法…':'Describe your next idea…','自动':'Auto',
+ '◉ 示例预览 · 不读取你的对话':'◉ Sample preview · your chats are never read','实际效果以 Codex 页面为准':'Actual appearance depends on Codex',
+ '01 / 选择区域':'01 / PICK A REGION','首页与对话可以拥有不同风景。':'Home and chat can have different looks.','02 / 保持清晰':'02 / KEEP IT CLEAR','增加遮罩强度，让文字更易读。':'Increase the overlay to improve readability.',
+ '方案名称':'Look name','与主界面共用背景':'Share the main background','壁纸连续铺满侧栏和主界面。遮罩为 0、模糊为 0 时完全透明；遮罩颜色沿用独立侧栏的遮罩颜色。':'Use one continuous wallpaper across the sidebar and main area. With overlay and blur at 0, it is fully transparent; the sidebar overlay color remains in use.',
+ '跟随首页的全部背景设置':'Use all home background settings','背景类型':'Background type','图片':'Image','纯色':'Solid color','渐变':'Gradient','选择一张喜欢的图片':'Choose an image you love','使用内置图片':'Use built-in image','底色':'Base color','渐变末端':'Gradient end','图片适配':'Image fit','填满画面':'Fill frame','完整显示':'Show whole image','遮罩颜色':'Overlay color','色彩模式':'Color mode','浅色':'Light','深色':'Dark',
+ '模式调整控件的明暗表现；文字和背景颜色可分别选择。':'The mode adjusts control contrast; text and background colors are chosen independently.','调整后自动应用到 Codex':'Automatically apply changes to Codex','首次使用请先点「应用到 Codex」。':'For first use, select “Apply to Codex”.','自动应用每次操作结束后合并更新。':'Automatic updates are merged after each adjustment.',
+ '随心调整，准备好后再应用。':'Adjust freely, then apply when ready.','导入':'Import','导出':'Export','撤销应用':'Undo apply','保存草稿':'Save draft','应用到 Codex ↗':'Apply to Codex ↗',
+ '恢复与运行管理':'Recovery & runtime','连接 Codex（必要时重启）':'Connect Codex (restart if needed)','恢复接管前主题':'Restore pre-studio theme','恢复 Codex 原生外观':'Restore native Codex appearance','停止自动保持':'Stop automatic persistence','验证当前应用':'Verify current apply',
+ '关闭窗口后，本地服务继续保持已应用主题。停止自动保持后，页面重载可能清除效果；原生基础配色还原可能需要重开 Codex。':'After this window closes, the local service keeps the applied theme. Stopping persistence may clear it on reload; restoring native colors may require restarting Codex.',
+ '水平位置':'Horizontal position','垂直位置':'Vertical position','画面缩放':'Image scale','图片模糊':'Image blur','背景不透明度':'Background opacity','遮罩强度':'Overlay strength','输入框不透明度':'Composer opacity','代码块不透明度':'Code block opacity','顶部菜单栏背景':'Top menu background','顶部菜单栏文字':'Top menu text','主要文字':'Primary text','次要文字':'Secondary text','强调色':'Accent color','侧栏文字':'Sidebar text','输入框 / 代码块':'Composer / code block','侧栏遮罩强度':'Sidebar overlay strength','毛玻璃模糊':'Frosted-glass blur',
+ '预览已更新 · 尚未应用':'Preview updated · not applied yet','正在应用并验证…':'Applying and verifying…','已应用到 Codex · 版本 ':'Applied to Codex · version ','请先点击「应用到 Codex」，之后滑块会自动更新。':'Select “Apply to Codex” first; sliders will then update automatically.','图片不能超过 6MB':'Image cannot exceed 6 MB','图片读取失败':'Could not read image','图片无法解码':'Could not decode image','当前页面不兼容':'Current page is incompatible','Codex 已连接':'Codex connected','Codex 未连接':'Codex not connected','正在连接 Codex，必要时会重新启动应用…':'Connecting Codex; the app may restart if needed…','连接检测完成，请点击应用。':'Connection check complete. Select Apply.','草稿已保存到 D:\\Codex_Background\\data':'Draft saved to D:\\Codex_Background\\data','已撤销上一次应用。':'Last apply undone.','已收藏当前方案。':'Current look saved.','请先选择一个自定义预设':'Choose a custom preset first','自定义预设已删除。':'Custom preset deleted.','预设已载入预览，点击应用后生效。':'Preset loaded into preview. Select Apply to use it.','文件过大':'File is too large','方案已导入预览，点击应用后生效。':'Look imported into preview. Select Apply to use it.','已导出主题包及可编辑 JSON：':'Theme package and editable JSON exported:','当前页面验证通过。':'Current page verification passed.','验证发现问题，请检查页面兼容性。':'Verification found an issue. Check page compatibility.'
+};
+const chinese=Object.fromEntries(Object.entries(english).map(([zh,en])=>[en,zh]));
+let locale=localStorage.getItem('background-studio-language')||'en';
+const t=text=>(locale==='en'?english[text]:chinese[text])||text;
+function translatePage(){
+ document.documentElement.lang=locale==='en'?'en':'zh-CN';$('language').value=locale;
+ const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let node;
+ while(node=walker.nextNode()){const raw=node.nodeValue,trimmed=raw.trim(),next=t(trimmed);if(trimmed&&next!==trimmed)node.nodeValue=raw.replace(trimmed,next);}
+ document.querySelectorAll('[aria-label]').forEach(el=>{const value=el.getAttribute('aria-label');el.setAttribute('aria-label',t(value));});
+}
 const $=id=>document.getElementById(id),api=createApiClient(document.querySelector('meta[name="studio-token"]').content);
 let config,base,presets=[],region='home',page='home',timer,applying=false,pending=false,hasApplied=false;
-function say(text,error=false){$('message').textContent=text;$('message').style.color=error?'#b65048':'#577467';}
+function say(text,error=false){$('message').textContent=t(text);$('message').style.color=error?'#b65048':'#577467';}
 async function run(fn){try{await fn();}catch(e){say(e.message,true);}}
 const clone=v=>structuredClone(v);
 function slider(id,label,min,max,step=1,unit='%'){return `<label class="slider"><div><span>${label}</span><output id="${id}Value"></output></div><input aria-label="${label}" id="${id}" type="range" min="${min}" max="${max}" step="${step}" data-unit="${unit}"></label>`;}
@@ -49,7 +82,7 @@ function preview(){
 function changed(){visibility();preview();say('预览已更新 · 尚未应用');if($('live').checked&&hasApplied){clearTimeout(timer);timer=setTimeout(applyNow,650);}}
 async function applyNow(){
  if(applying){pending=true;return;}applying=true;$('apply').disabled=true;const draft=clone(config);say('正在应用并验证…');
- try{const result=await api('apply',{config:draft});hasApplied=true;say('已应用到 Codex · 版本 '+result.version);await check();}
+ try{const result=await api('apply',{config:draft});hasApplied=true;say(t('已应用到 Codex · 版本 ')+result.version);await check();}
  catch(e){$('live').checked=false;say(e.message,true);pending=false;}
  finally{applying=false;$('apply').disabled=false;if(pending){pending=false;applyNow();}}
 }
@@ -60,8 +93,9 @@ $('regions').onclick=e=>{const b=e.target.closest('button');if(!b)return;region=
 $('previewTabs').onclick=e=>{const b=e.target.closest('button');if(b){page=b.dataset.page;preview();}};
 $('imageFile').onchange=()=>run(async()=>{const file=$('imageFile').files[0];if(!file)return;if(file.size>6*1024*1024)throw Error('图片不能超过 6MB');const targetRegion=region;const reader=new FileReader();const data=await new Promise((resolve,reject)=>{reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('图片读取失败'));reader.readAsDataURL(file);});await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(Error('图片无法解码'));image.src=data;});config[targetRegion].image=data;$('imageFile').value='';changed();});
 $('resetImage').onclick=()=>{config[region].image=null;changed();};
-async function check(){const s=await api('status');$('connection').textContent=s.connected?(s.compatible?'Codex 已连接':'当前页面不兼容'):'Codex 未连接';$('dot').style.background=s.connected&&s.compatible?'#5b967c':'#c9a367';$('connection').title=s.lastError||'';return s;}
+async function check(){const s=await api('status');$('connection').textContent=t(s.connected?(s.compatible?'Codex 已连接':'当前页面不兼容'):'Codex 未连接');$('dot').style.background=s.connected&&s.compatible?'#5b967c':'#c9a367';$('connection').title=s.lastError||'';return s;}
 $('check').onclick=()=>run(check);$('apply').onclick=()=>{clearTimeout(timer);applyNow();};$('live').onchange=()=>{if($('live').checked&&!hasApplied)say('请先点击「应用到 Codex」，之后滑块会自动更新。');};
+$('language').onchange=()=>{locale=$('language').value;localStorage.setItem('background-studio-language',locale);fill();translatePage();};
 $('connect').onclick=()=>run(async()=>{say('正在连接 Codex，必要时会重新启动应用…');await api('connect');await check();say('连接检测完成，请点击应用。');});
 $('save').onclick=()=>run(async()=>{await api('save',{config});say('草稿已保存到 D:\\Codex_Background\\data');});
 function cancelLive(){clearTimeout(timer);pending=false;$('live').checked=false;}
@@ -70,11 +104,11 @@ function refreshPresets(){const p=$('preset');while(p.options.length>4)p.remove(
 $('savePreset').onclick=()=>run(async()=>{const j=await api('preset',{config});presets=j.presets;refreshPresets();$('preset').value=presets.at(-1).id;say('已收藏当前方案。');});
 $('deletePreset').onclick=()=>run(async()=>{if(!presets.some(p=>p.id===$('preset').value))throw Error('请先选择一个自定义预设');presets=(await api('delete-preset',{id:$('preset').value})).presets;refreshPresets();say('自定义预设已删除。');});
 $('preset').onchange=()=>{const id=$('preset').value;if(!id)return;cancelLive();config=clone(presets.find(x=>x.id===id)?.config||base);
- if(id==='night'){Object.assign(config,{name:'深海夜色',mode:'dark',ink:'#e2edf6',muted:'#9aaec3',accent:'#85bfb3',panel:'#1a2b40',sidebarInk:'#c7deed'});for(const k of ['home','chat','sidebar'])Object.assign(config[k],{type:'gradient',color:'#152b43',color2:'#0c1729',wash:'#132337',washOpacity:20});}
- if(id==='paper'){Object.assign(config,{name:'暖纸留白',ink:'#534b40',muted:'#8b7f6d',accent:'#9c7154',panel:'#fffaf1',sidebarInk:'#625747'});for(const k of ['home','chat','sidebar'])Object.assign(config[k],{type:'solid',color:k==='sidebar'?'#e8dfcf':'#f5efe3',wash:'#f5efe3',washOpacity:0});}
+ if(id==='night'){Object.assign(config,{name:t('深海夜色'),mode:'dark',ink:'#e2edf6',muted:'#9aaec3',accent:'#85bfb3',panel:'#1a2b40',sidebarInk:'#c7deed'});for(const k of ['home','chat','sidebar'])Object.assign(config[k],{type:'gradient',color:'#152b43',color2:'#0c1729',wash:'#132337',washOpacity:20});}
+ if(id==='paper'){Object.assign(config,{name:t('暖纸留白'),ink:'#534b40',muted:'#8b7f6d',accent:'#9c7154',panel:'#fffaf1',sidebarInk:'#625747'});for(const k of ['home','chat','sidebar'])Object.assign(config[k],{type:'solid',color:k==='sidebar'?'#e8dfcf':'#f5efe3',wash:'#f5efe3',washOpacity:0});}
  fill();say('预设已载入预览，点击应用后生效。');};
 $('import').onclick=()=>$('importFile').click();$('importFile').onchange=()=>run(async()=>{const f=$('importFile').files[0];if(!f)return;if(f.size>28*1024*1024)throw Error('文件过大');const j=await api('import',{value:JSON.parse(await f.text())});cancelLive();config=j.config;fill();$('importFile').value='';say('方案已导入预览，点击应用后生效。');});
 $('export').onclick=()=>run(async()=>{const j=await api('export',{config});say('已导出主题包及可编辑 JSON：'+j.editable);});
 for(const [id,action]of [['original','original'],['restore','restore'],['pause','pause']])$(id).onclick=()=>run(async()=>{cancelLive();const r=await api(action);if(r.ok===false)throw Error('渲染层未能移除：'+(r.result?.renderer?.message||'请连接 Codex 后重试'));if(id==='original'){config=(await api('config')).config;fill();}say(r.message||({original:'已恢复接管前主题。',pause:'已停止自动保持；当前页面效果暂时保留。'}[id]));await check();});
 $('verify').onclick=()=>run(async()=>{const j=await api('verify');say(j.results.every(x=>x.result?.pass)?'当前页面验证通过。':'验证发现问题，请检查页面兼容性。',!j.results.every(x=>x.result?.pass));});
-await run(async()=>{const j=await api('config');config=j.config;base=j.defaults;presets=j.presets;refreshPresets();fill();await check();});
+await run(async()=>{const j=await api('config');config=j.config;base=j.defaults;presets=j.presets;refreshPresets();fill();translatePage();await check();});
