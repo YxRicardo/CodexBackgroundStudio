@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {validateThemePackage} from './core/src/index.mjs';
 import {isValidBase64} from './core/src/theme/base64.mjs';
 export const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-export const region=()=>({type:'gradient',color:'#eef7ff',color2:'#dcecff',image:null,opacity:100,wash:'#eef7ff',washOpacity:65,blur:0,x:80,y:50,fit:'cover',zoom:100});
+export const region=()=>({type:'gradient',color:'#eef7ff',color2:'#dcecff',image:null,opacity:100,wash:'#eef7ff',washOpacity:65,blur:0,x:80,y:50,fit:'cover',zoom:100,flipX:false});
 export const defaults=()=>({schema:1,name:'Azure glow',mode:'light',menuBg:'#98bce2',menuInk:'#203653',ink:'#203653',muted:'#576c85',accent:'#6e60b7',sidebarInk:'#e5f4ff',panel:'#f8fcff',panelOpacity:94,codeOpacity:92,replyOpacity:0,userMessageOpacity:0,workspaceHeaderWash:'#f8fcff',workspaceHeaderOverlay:84,workspaceHeaderBlur:18,sync:true,home:region(),chat:{...region(),washOpacity:80},sidebar:{...region(),type:'gradient',color:'#193657',color2:'#122743',wash:'#142a49',washOpacity:35}});
 const color=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);
 export function validate(c){
@@ -21,6 +21,8 @@ export function validate(c){
  for(const k of ['panelOpacity','codeOpacity','replyOpacity','userMessageOpacity'])if(!num(c[k],0,100))throw Error('透明度无效');
  for(const key of ['home','chat','sidebar']){
   const r=c[key]; if(!r||!['solid','gradient','image'].includes(r.type)||!['cover','contain'].includes(r.fit))throw Error('背景类型无效');
+  r.flipX??=false;
+  if(typeof r.flipX!=='boolean')throw Error('图片翻转参数无效');
   for(const k of ['color','color2','wash'])if(!color(r[k]))throw Error('背景颜色无效');
   for(const k of ['opacity','washOpacity','x','y'])if(!num(r[k],0,100))throw Error('滑块参数无效: '+k);
   if(!num(r.zoom,100,180)||!num(r.blur,0,30))throw Error('缩放或模糊无效');
@@ -42,7 +44,7 @@ export const rgba=(hex,a)=>`rgba(${[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16))
 export function regionCSS(selector,r,imageId){
  const background=r.type==='solid'?r.color:r.type==='gradient'?`linear-gradient(155deg,${r.color},${r.color2})`:`var(--codedrobe-image-${imageId},none)`;
  return `${selector}{position:relative;isolation:isolate;background:${r.color}!important;overflow:hidden!important;}
- ${selector}::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;background-image:${r.type==='solid'?'none':background};background-color:${r.color};background-size:${r.fit};background-position:${r.x}% ${r.y}%;background-repeat:no-repeat;opacity:${r.opacity/100};filter:blur(${r.blur}px);transform:scale(${r.zoom/100});}
+ ${selector}::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;background-image:${r.type==='solid'?'none':background};background-color:${r.color};background-size:${r.fit};background-position:${r.x}% ${r.y}%;background-repeat:no-repeat;opacity:${r.opacity/100};filter:blur(${r.blur}px);transform:scaleX(${r.flipX?-1:1}) scale(${r.zoom/100});}
  ${selector}::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:${rgba(r.wash,r.washOpacity/100)};}`;
 }
 export async function makeBundle(input){
@@ -63,6 +65,11 @@ export async function makeBundle(input){
  ${s}{background:${rgba(c.sidebar.wash,c.sidebarOverlay/100)}!important;backdrop-filter:blur(${c.sidebarBlur}px);}
  ${s}::before,${s}::after{content:none!important;}`:'';
  const panel=rgba(c.panel,c.panelOpacity/100),line=rgba(c.ink,.18);
+ const rightPanel=`${m} aside[data-app-shell-focus-area="right-panel"]`;
+ const rightTabs=`${m} [data-app-shell-tab-row]:has([data-app-shell-tab-strip-controller="right"])`;
+ const rightToolbar=`${m} [data-app-shell-tab-panel-controller="right"] .h-toolbar-pane:not([data-app-shell-tab-row])`;
+ const pinnedSummary=`${h} .bg-surface-elevated-secondary.rounded-3xl:has([data-slot="thread-summary-panel-item-button"])`;
+ const chromeWash=rgba(c.workspaceHeaderWash,c.workspaceHeaderOverlay/100);
  const css=`${h}{color-scheme:${c.mode}!important;
  --color-token-bg-primary:${c.home.color}!important;--color-token-main-surface-primary:${c.home.color}!important;
  --color-token-bg-secondary:${panel}!important;--color-token-bg-tertiary:${rgba(c.panel,.8)}!important;
@@ -102,6 +109,20 @@ export async function makeBundle(input){
     the sidebar section (such as Enter fullscreen) remain crisp. */
  ${m}>header,${m} header.app-header-tint{background:transparent!important;color:${c.ink}!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
  ${m}>header>div[class~="flex-1"],${m} header.app-header-tint>div[class~="flex-1"]{background:${rgba(c.workspaceHeaderWash,c.workspaceHeaderOverlay/100)}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
+ /* Native panel wrappers share this dedicated token. Keep general surface and
+    component theme tokens intact so terminal, file tree and WebView content
+    retain their own backgrounds. The main shell already owns the wallpaper. */
+ ${rightPanel}{--app-shell-panel-background:transparent!important;}
+ ${rightTabs},${rightToolbar}{background:${chromeWash}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
+ /* Only tab-strip chrome: preserve selected/hovered tabs and button states.
+    Native overflow fades and the pinned add-tab tray otherwise paint solid strips. */
+ ${rightTabs} [data-app-shell-tab-strip-controller="right"] .sticky>.bg-surface{background:transparent!important;}
+ ${rightTabs} [data-app-shell-tab-strip-controller="right"]>.sticky::after{background-image:none!important;}
+ /* Match the observed summary card through its item slots. The card owns the
+    only wash; native sticky section headers and their top fillers must not
+    paint an opaque elevated surface over it. */
+ ${pinnedSummary}{background:${panel}!important;border-color:${line}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
+ ${pinnedSummary} header.bg-surface-elevated-secondary,${pinnedSummary} header.bg-surface-elevated-secondary::before{background:transparent!important;}
  ${h} .composer-surface-chrome{background:${panel}!important;border-color:${line}!important;color:${c.ink}!important;}
  ${m} [class*="_ComposerLayoutRoot_"]:has(.ProseMirror[contenteditable="true"]){background:${panel}!important;}
  /* ChatGPT Chat ships an additional nearly-opaque body inside the composer.
@@ -114,6 +135,10 @@ export async function makeBundle(input){
  ${m} .sticky.z-30.bg-surface:has(input.bg-transparent){background:transparent!important;}
  ${m} .sticky.z-30.bg-surface:has(input.bg-transparent)::after{background:none!important;}
  ${m} div:has(>input.bg-transparent){background:${panel}!important;border-color:${line}!important;}
+ /* Both choice and free-text requests use this native outer card. Paint once
+    here, including the title and footer; tinting the radio group's parent
+    leaves the opaque elevated card behind it and misses free-text requests. */
+ ${h} [data-codex-composer-request-navigation]{background:${panel}!important;border-color:${line}!important;}
  ${h} .composer-surface-chrome :is(textarea,.ProseMirror){color:${c.ink}!important;caret-color:${c.accent};}
  ${m} [data-markdown-text-style="assistant-message"]{background-color:${rgba(c.panel,c.replyOpacity/100)}!important;border-radius:10px;}
  /* The native bubble owns the only user-message background, including its padding. */

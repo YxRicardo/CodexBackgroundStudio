@@ -2,7 +2,7 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {execFile} from 'node:child_process';
+import {execFile,spawn} from 'node:child_process';
 import {promisify} from 'node:util';
 import {ROOT,defaults,validate,makeBundle} from './engine.mjs';
 import {getAdapter,probeApp,applyTheme,verifyTheme,watchTheme,resolveThemeTarget,restoreSkin,launchApp,findRunningPids} from './core/src/index.mjs';
@@ -14,6 +14,7 @@ const write=async(name,value)=>{const dest=path.join(data,name);await fs.writeFi
 let config=validate(await read('config.json',defaults())),active=await read('active.json',null),previous=await read('previous.json',null),enabled=await read('enabled.json',false),watch=null,watchDone=null,lastError=null,chain=Promise.resolve();
 let activeConfig=await read('active-config.json',config);
 let reconnecting=false,lastReconnectAttempt=0;
+let restarting=false;
 const serial=fn=>{const job=chain.then(fn);chain=job.catch(()=>{});return job;};
 async function stopWatch(){if(watch){watch.abort();await watchDone;watch=null;watchDone=null;}}
 async function startWatch(bundle){await stopWatch();const ctrl=new AbortController();watch=ctrl;watchDone=watchTheme({adapter,targetTheme:resolveThemeTarget(bundle,'codex'),port,signal:ctrl.signal,onEvent:e=>{if(e.type==='error')lastError=e.message;else if(e.type==='injected')lastError=null;}}).catch(e=>{lastError=e.message;});}
@@ -33,6 +34,17 @@ async function maintainRestartPersistence(){
   lastError=null;
  }catch(e){lastError=e.message;}
  finally{reconnecting=false;}
+}
+function restartService(){
+ if(restarting)return {ok:true,restarting:true};
+ restarting=true;
+ /* Reply before closing the listener so the control page can show feedback.
+    The replacement process starts only after the port is released. */
+ setTimeout(async()=>{
+  try{await stopWatch();}
+  finally{server.close(()=>{const child=spawn(process.execPath,[path.join(ROOT,'app','server.mjs')],{cwd:ROOT,detached:true,stdio:'ignore',windowsHide:true});child.unref();});}
+ },120);
+ return {ok:true,restarting:true};
 }
 async function apply(bundle,nextConfig){
  const targetTheme=resolveThemeTarget(bundle,'codex');
@@ -54,7 +66,8 @@ async function body(req){let n=0,parts=[];for await(const b of req){n+=b.length;
 async function status(){const autoStart=await autoStartStatus();try{const checks=await probeApp({adapter,port,timeoutMs:1400});return {connected:true,compatible:checks.some(x=>x.result?.compatible),enabled,autoStart,theme:active?.theme||null,lastError};}catch(e){return {connected:false,compatible:false,enabled,autoStart,lastError:e.message};}}
 async function api(route,b){
  switch(route){
- case '/api/status':return status();
+  case '/api/status':return status();
+  case '/api/restart':return restartService();
  case '/api/connect':{const s=await status();if(s.connected)return s;await launchApp({adapter,port,restartExisting:true,timeoutMs:30000});return status();}
  case '/api/config':return {config,defaults:defaults(),presets:await read('presets.json',[])};
  case '/api/save':config=validate(b.config);await write('config.json',config);return {ok:true};

@@ -31,8 +31,7 @@ if (Test-Path -LiteralPath $stateFile) {
     try {
         $owner = Get-Content -Raw -LiteralPath $stateFile | ConvertFrom-Json
         $process = Get-CimInstance Win32_Process -Filter "ProcessId = $($owner.pid)" -ErrorAction SilentlyContinue
-        $expected = '"' + $serverScript + '"'
-        if ($process -and $process.CommandLine.Contains($expected)) {
+        if ($process -and $process.CommandLine.Contains($serverScript)) {
             exit 0
         }
     } catch {

@@ -96,7 +96,7 @@ function relativeExecutableNames(config) {
 
 async function queryRegistryValue(key, valueName) {
   try {
-    const { stdout } = await execFileAsync("reg.exe", ["query", key, "/v", valueName]);
+    const { stdout } = await execFileAsync("reg.exe", ["query", key, "/v", valueName], { windowsHide: true });
     const pattern = new RegExp(`${valueName}\\s+REG_(?:EXPAND_)?SZ\\s+(.+)`, "i");
     return pattern.exec(stdout)?.[1]?.trim().replace(/^"|"$/g, "") || null;
   } catch {
@@ -138,7 +138,7 @@ async function discoverWindows(adapter, config) {
   if (config.appxPackage) {
     const script = `(Get-AppxPackage ${config.appxPackage} | Sort-Object Version -Descending | Select-Object -First 1).InstallLocation`;
     try {
-      const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script]);
+      const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { windowsHide: true });
       const appPath = stdout.trim();
       if (appPath) {
         const executable = path.join(appPath, config.executableRelative);
@@ -218,7 +218,7 @@ export async function findRunningPids(adapter, platform = process.platform, exec
       ...(executablePath ? [path.win32.basename(executablePath)] : []),
     ].map(withExe));
     if (!names.size) return [];
-    const { stdout } = await execFileAsync("tasklist.exe", ["/FO", "CSV", "/NH"]);
+    const { stdout } = await execFileAsync("tasklist.exe", ["/FO", "CSV", "/NH"], { windowsHide: true });
     return stdout.split(/\r?\n/).flatMap((line) => {
       const match = /^"([^"]+)","(\d+)"/.exec(line);
       if (!match || !names.has(match[1].toLowerCase())) return [];
@@ -235,7 +235,7 @@ async function stopExisting(adapter, pids, platform = process.platform, executab
   } else if (platform === "win32" && pids.length) {
     // /T also stops child process trees (gpu/network/renderer helpers) so the
     // CDP port is actually released before relaunching.
-    await execFileAsync("taskkill.exe", ["/F", "/T", ...pids.flatMap((pid) => ["/PID", String(pid)])]).catch(() => {});
+    await execFileAsync("taskkill.exe", ["/F", "/T", ...pids.flatMap((pid) => ["/PID", String(pid)])], { windowsHide: true }).catch(() => {});
   }
   for (let attempt = 0; attempt < 30; attempt += 1) {
     if (!(await findRunningPids(adapter, platform, executablePath)).length) return;

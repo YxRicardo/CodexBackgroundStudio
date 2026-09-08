@@ -14,8 +14,14 @@ Scheduled tasks and Plugins share a sticky search tray. Its native opaque surfac
 
 Private screenshot evidence and layout verification are stored under work and are excluded from release archives.
 
+Request input cards: the observed native outer surface is `[data-codex-composer-request-navigation]`, with `bg-surface-elevated-secondary` and `@container/request-card`. Apply the composer panel color, opacity and border once to that outer surface, including its question title and footer. Do not tint `radiogroup` parents: this stacks washes over an opaque outer card and misses free-text requests. The selector does not depend on options being present. Verify computed card and inner backgrounds in the live renderer, not only the emitted CSS string.
+
 User-message background opacity applies to the native `.bg-user-message` bubble, preserving its padding and rounded corners. The inner Markdown background is transparent so the message has a single background layer, including at zero opacity.
 
 1.0.6: Optional shared wallpaper uses the common shell with a direct sidebar child and descendant main. Paint artwork once behind both regions; disable their local artwork only when enabled. Home detection selects home settings, otherwise chat settings. Sidebar uses only an optional color overlay and backdrop blur. Native content structure remains unchanged.
 
 1.0.7: Scope the workspace-header glass fallback to the main content surface, then apply the glass to the header's flexible workspace section instead of the full fixed header. The fixed header also spans an open details sidebar; leaving it unfiltered keeps sidebar controls such as Enter fullscreen crisp.
+
+Right tool-panel chrome: the native right-panel aside sets only `--app-shell-panel-background` to transparent, exposing the existing main/shared wallpaper through its frame and tab-content wrappers. Right-controller tab rows and pane-height toolbars reuse the workspace-header overlay color, strength and blur. Tab overflow fades and the sticky add-tab tray are transparent, while native selection, hover, focus, borders, resizing and layout remain intact. General surface tokens, terminal rendering, file-tree Shadow DOM and embedded WebViews are not overridden. Existing content that is already transparent naturally reveals the wallpaper. No extra wallpaper layer or runtime observer is needed.
+
+Pinned summary (verified against the live Windows DOM): the card is a rounded `bg-surface-elevated-secondary` container with `data-slot="thread-summary-panel-item-button"` descendants. It has no pinned-summary test hook. Match that container and apply the panel wash and workspace blur once; clear the native sticky section-header background and its `::before` filler. Preserve item hover and focus states. CSS string tests alone do not establish that a native surface matches; the live regression check must assert a visible card and its computed styles.
