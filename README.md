@@ -7,7 +7,7 @@ The interface defaults to English and includes an in-app English / Chinese langu
 ## Features
 
 - Independently configure home, chat, sidebar, and panel appearances.
-- Use a solid color, gradient, or PNG/JPEG/WebP image (up to 6 MB).
+- Use a solid color, gradient, or PNG/JPEG/WebP image (up to 6 MB; oversized PNGs are converted to JPEG and oversized JPEGs are compressed automatically).
 - Adjust image position, zoom, blur, opacity, and overlay strength.
 - Independently adjust the workspace title bar’s overlay color, strength, and frosted-glass blur.
 - Share a continuous background between the main content and sidebar.
@@ -64,7 +64,7 @@ Codex Background Studio 是一款 Windows 本地编辑器，用于配置 Codex �
 ## 功能
 
 - 分别配置首页、对话、侧栏和面板外观。
-- 支持纯色、渐变或 PNG/JPEG/WebP 图片（最大 6 MB）。
+- 支持纯色、渐变或 PNG/JPEG/WebP 图片（最大 6 MB；超限 PNG 会自动转换为 JPEG，超限 JPEG 会自动压缩）。
 - 调节图片位置、缩放、模糊、透明度和遮罩强度。
 - 单独调节工作空间顶部标题栏的遮罩颜色、强度和毛玻璃模糊。
 - 让主内容区和侧栏共用连续背景。

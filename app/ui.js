@@ -23,6 +23,7 @@ const english={
  '水平位置':'Horizontal position','垂直位置':'Vertical position','画面缩放':'Image scale','图片模糊':'Image blur','背景不透明度':'Background opacity','遮罩强度':'Overlay strength','输入框不透明度':'Composer opacity','代码块不透明度':'Code block opacity','回复背景不透明度':'Reply background opacity','用户消息背景不透明度':'User message background opacity','顶部菜单栏背景':'Top menu background','顶部菜单栏文字':'Top menu text','主要文字':'Primary text','次要文字':'Secondary text','强调色':'Accent color','侧栏文字':'Sidebar text','输入框 / 代码块 / 消息':'Composer / code block / messages','侧栏遮罩颜色':'Sidebar overlay color','侧栏遮罩强度':'Sidebar overlay strength','毛玻璃模糊':'Frosted-glass blur','顶部工作空间':'WORKSPACE HEADER','调整工作空间标题栏及右侧面板标签栏、工具栏的遮罩和毛玻璃效果。遮罩和模糊均为 0 时完全透明。':'Adjust the workspace header and right panel tab and tool bars. Set overlay and blur to 0 for full transparency.','顶部工作空间遮罩颜色':'Workspace header overlay color','顶部工作空间遮罩强度':'Workspace header overlay strength','顶部工作空间毛玻璃模糊':'Workspace header frosted-glass blur',
  '预览已更新 · 尚未应用':'Preview updated · not applied yet','正在应用并验证…':'Applying and verifying…','已应用到 Codex · 版本 ':'Applied to Codex · version ','请先点击「应用到 Codex」，之后滑块会自动更新。':'Select “Apply to Codex” first; sliders will then update automatically.','图片不能超过 6MB':'Image cannot exceed 6 MB','图片读取失败':'Could not read image','图片无法解码':'Could not decode image','当前页面不兼容':'Current page is incompatible','Codex 已连接':'Codex connected','Codex 未连接':'Codex not connected','正在连接 Codex，必要时会重新启动应用…':'Connecting Codex; the app may restart if needed…','连接检测完成，请点击应用。':'Connection check complete. Select Apply.','草稿已保存到 D:\\Codex_Background\\data':'Draft saved to D:\\Codex_Background\\data','已撤销上一次应用。':'Last apply undone.','已收藏当前方案。':'Current look saved.','请先选择一个自定义预设':'Choose a custom preset first','自定义预设已删除。':'Custom preset deleted.','预设已载入预览，点击应用后生效。':'Preset loaded into preview. Select Apply to use it.','文件过大':'File is too large','方案已导入预览，点击应用后生效。':'Look imported into preview. Select Apply to use it.','已导出主题包及可编辑 JSON：':'Theme package and editable JSON exported:','当前页面验证通过。':'Current page verification passed.','验证发现问题，请检查页面兼容性。':'Verification found an issue. Check page compatibility.'
 };
+english['PNG / JPG / WebP · 最大 6MB；超限 PNG/JPG 自动压缩']='PNG / JPG / WebP · max 6 MB; large PNGs and JPEGs are compressed automatically';
 const chinese=Object.fromEntries(Object.entries(english).map(([zh,en])=>[en,zh]));
 let locale=localStorage.getItem('background-studio-language')||'en';
 const t=text=>(locale==='en'?english[text]:chinese[text])||text;
@@ -34,9 +35,24 @@ function translatePage(){
 }
 const $=id=>document.getElementById(id),api=createApiClient(document.querySelector('meta[name="studio-token"]').content);
 let config,base,presets=[],region='home',page='home',timer,applying=false,pending=false,hasApplied=false;
+const MAX_IMAGE_BYTES=6*1024*1024;
 function say(text,error=false){$('message').textContent=t(text);$('message').style.color=error?'#b65048':'#577467';}
 async function run(fn){try{await fn();}catch(e){say(e.message,true);}}
 const clone=v=>structuredClone(v);
+const readAsDataUrl=file=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('图片读取失败'));reader.readAsDataURL(file);});
+const loadImage=file=>new Promise((resolve,reject)=>{const url=URL.createObjectURL(file),image=new Image();image.onload=()=>{URL.revokeObjectURL(url);resolve(image);};image.onerror=()=>{URL.revokeObjectURL(url);reject(Error('图片无法解码'));};image.src=url;});
+const canvasJpeg=(canvas,quality)=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('图片转换失败')),'image/jpeg',quality));
+async function compressLargeImage(file,matte){
+ const image=await loadImage(file);let width=image.naturalWidth,height=image.naturalHeight;
+ // Keep reducing quality first, then resolution. JPEG has no alpha channel, so transparent pixels use the selected base colour.
+ for(let scalePass=0;scalePass<7;scalePass++){
+  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(width));canvas.height=Math.max(1,Math.round(height));
+  const context=canvas.getContext('2d');context.fillStyle=matte;context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(image,0,0,canvas.width,canvas.height);
+  for(const quality of [.92,.84,.76,.68,.6,.52]){const jpeg=await canvasJpeg(canvas,quality);if(jpeg.size<=MAX_IMAGE_BYTES)return jpeg;}
+  width*=.82;height*=.82;
+ }
+ throw Error('图片压缩后仍超过 6MB，请选择尺寸更小的图片');
+}
 function slider(id,label,min,max,step=1,unit='%'){return `<label class="slider"><div><span>${label}</span><output id="${id}Value"></output></div><input aria-label="${label}" id="${id}" type="range" min="${min}" max="${max}" step="${step}" data-unit="${unit}"></label>`;}
 $('imageSliders').innerHTML=slider('x','水平位置',0,100)+slider('y','垂直位置',0,100)+slider('zoom','画面缩放',100,180)+slider('blur','图片模糊',0,30,1,'px');
 $('imageControls').insertAdjacentHTML('afterbegin','<label class="toggle"><input id="flipX" type="checkbox">水平翻转图片</label>');
@@ -107,7 +123,16 @@ for(const k of ['mode','menuBg','menuInk','ink','muted','accent','sidebarInk','p
 $('name').oninput=()=>{config.name=$('name').value;changed();};$('sync').onchange=()=>{config.sync=$('sync').checked;changed();};
 $('regions').onclick=e=>{const b=e.target.closest('button');if(!b)return;region=b.dataset.region;if(region==='home'||region==='chat')page=region;fill();};
 $('previewTabs').onclick=e=>{const b=e.target.closest('button');if(b){page=b.dataset.page;preview();}};
-$('imageFile').onchange=()=>run(async()=>{const file=$('imageFile').files[0];if(!file)return;if(file.size>6*1024*1024)throw Error('图片不能超过 6MB');const targetRegion=region;const reader=new FileReader();const data=await new Promise((resolve,reject)=>{reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('图片读取失败'));reader.readAsDataURL(file);});await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(Error('图片无法解码'));image.src=data;});config[targetRegion].image=data;$('imageFile').value='';changed();});
+$('imageFile').onchange=()=>run(async()=>{let file=$('imageFile').files[0];if(!file)return;const targetRegion=region;let compressed=false,sourceWasPng=false;
+ if(file.size>MAX_IMAGE_BYTES){
+  sourceWasPng=file.type==='image/png'||/\.png$/i.test(file.name);
+  const sourceWasJpeg=file.type==='image/jpeg'||/\.jpe?g$/i.test(file.name);
+  if(!sourceWasPng&&!sourceWasJpeg)throw Error('图片不能超过 6MB');
+  file=await compressLargeImage(file,config[targetRegion].color);compressed=true;
+ }
+ const data=await readAsDataUrl(file);await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(Error('图片无法解码'));image.src=data;});config[targetRegion].image=data;$('imageFile').value='';changed();
+ if(compressed){const size=(file.size/1024/1024).toFixed(1),action=sourceWasPng?'转换为 JPEG':'已压缩';say(locale==='en'?`Large ${sourceWasPng?'PNG converted to JPEG':'JPEG compressed'} (${size} MB).`:`超出限制的图片${action}（${size} MB）。`);}
+});
 $('resetImage').onclick=()=>{config[region].image=null;changed();};
 async function check(){const s=await api('status');$('connection').textContent=t(s.connected?(s.compatible?'Codex 已连接':'当前页面不兼容'):'Codex 未连接');$('dot').style.background=s.connected&&s.compatible?'#5b967c':'#c9a367';$('connection').title=s.lastError||'';$('autoStartStatus').textContent=t(s.autoStart?.enabled?'开机恢复：已启用':'开机恢复：未启用');$('enableAutoStart').disabled=Boolean(s.autoStart?.enabled);$('disableAutoStart').disabled=!s.autoStart?.enabled;return s;}
 $('check').onclick=()=>run(check);$('apply').onclick=()=>{clearTimeout(timer);applyNow();};$('live').onchange=()=>{if($('live').checked&&!hasApplied)say('请先点击「应用到 Codex」，之后滑块会自动更新。');};

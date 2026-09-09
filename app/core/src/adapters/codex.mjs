@@ -7,6 +7,7 @@ const codex = {
   defaultPort: 9335,
   lastVerified: {
     darwin: { appVersion: "26.707.72221", build: "5307", verifiedAt: "2026-07-16" },
+    win32: { appVersion: "26.903.8094.0", verifiedAt: "2026-09-09" },
   },
   rendererProfiles: {
     [codexThemeV1Profile.id]: codexThemeV1Profile,

@@ -56,12 +56,15 @@ export async function makeBundle(input){
   const [,mime,base64]=data.match(/^data:([^;]+);base64,(.*)$/s);
   images[k]={filename:k+'.'+({ 'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[mime]),mimeType:mime,base64};
  }
- const h='html.codedrobe-host-codex',m=`${h} main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface'])`,s=`${h} aside.app-shell-left-panel`;
- const shell=`${h} div:has(>aside.app-shell-left-panel):has(main.border-l-hairline)`;
+ const h='html.codedrobe-host-codex',mainAnchor=`main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface'])`,m=`${h} ${mainAnchor}`,s=`${h} aside.app-shell-left-panel`;
+ // Select the full-width flex row that directly owns the sidebar and the main
+ // clip. Keep :has() calls sequential: CSS forbids nesting :has() inside
+ // another :has(), and newer Codex Chromium releases reject such rules.
+ const shell=`${h} div:has(>aside.app-shell-left-panel):has(>div>main.border-l-hairline)`;
  const shared=c.sidebarShared?`${regionCSS(shell,c.sync?c.home:c.chat,'chat')}
  ${regionCSS(`${shell}:has(.dream-home)`,c.home,'home')}
- ${m},${m}:has(.dream-home){background:transparent!important;}
- ${m}::before,${m}::after,${m}:has(.dream-home)::before,${m}:has(.dream-home)::after{content:none!important;}
+ ${shell} ${mainAnchor}{background:transparent!important;}
+ ${shell} ${mainAnchor}::before,${shell} ${mainAnchor}::after{content:none!important;}
  ${s}{background:${rgba(c.sidebar.wash,c.sidebarOverlay/100)}!important;backdrop-filter:blur(${c.sidebarBlur}px);}
  ${s}::before,${s}::after{content:none!important;}`:'';
  const panel=rgba(c.panel,c.panelOpacity/100),line=rgba(c.ink,.18);

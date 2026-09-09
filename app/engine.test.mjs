@@ -36,3 +36,14 @@ test('background images can be flipped horizontally without changing their asset
   assert.match(css,/transform:scaleX\(-1\) scale\(1\)/);
   assert.equal(config.home.flipX,true);
 });
+
+test('shared background uses the full-width sidebar and main parent with valid :has()', async () => {
+  const config=defaults();
+  config.sidebarShared=true;
+  const css=(await makeBundle(config)).targets.codex.css;
+
+  assert.match(css,/html\.codedrobe-host-codex div:has\(>aside\.app-shell-left-panel\):has\(>div>main\.border-l-hairline\)\{/);
+  assert.doesNotMatch(css,/div:has\(>main\.border-l-hairline:has\(/);
+  assert.doesNotMatch(css,/div:has\([^)]*:has\(/);
+  assert.match(css,/div:has\(>aside\.app-shell-left-panel\):has\(>div>main\.border-l-hairline\) main\.border-l-hairline[^,{]*::before,[^{]*div:has\(>aside\.app-shell-left-panel\):has\(>div>main\.border-l-hairline\) main\.border-l-hairline[^,{]*::after\{content:none/);
+});
