@@ -24,6 +24,8 @@ const english={
  '预览已更新 · 尚未应用':'Preview updated · not applied yet','正在应用并验证…':'Applying and verifying…','已应用到 Codex · 版本 ':'Applied to Codex · version ','请先点击「应用到 Codex」，之后滑块会自动更新。':'Select “Apply to Codex” first; sliders will then update automatically.','图片不能超过 6MB':'Image cannot exceed 6 MB','图片读取失败':'Could not read image','图片无法解码':'Could not decode image','当前页面不兼容':'Current page is incompatible','Codex 已连接':'Codex connected','Codex 未连接':'Codex not connected','正在连接 Codex，必要时会重新启动应用…':'Connecting Codex; the app may restart if needed…','连接检测完成，请点击应用。':'Connection check complete. Select Apply.','草稿已保存到 D:\\Codex_Background\\data':'Draft saved to D:\\Codex_Background\\data','已撤销上一次应用。':'Last apply undone.','已收藏当前方案。':'Current look saved.','请先选择一个自定义预设':'Choose a custom preset first','自定义预设已删除。':'Custom preset deleted.','预设已载入预览，点击应用后生效。':'Preset loaded into preview. Select Apply to use it.','文件过大':'File is too large','方案已导入预览，点击应用后生效。':'Look imported into preview. Select Apply to use it.','已导出主题包及可编辑 JSON：':'Theme package and editable JSON exported:','当前页面验证通过。':'Current page verification passed.','验证发现问题，请检查页面兼容性。':'Verification found an issue. Check page compatibility.'
 };
 english['PNG / JPG / WebP · 最大 6MB；超限 PNG/JPG 自动压缩']='PNG / JPG / WebP · max 6 MB; large PNGs and JPEGs are compressed automatically';
+Object.assign(english,{'使用 Codex 原生对话宽度':'Use native Codex chat width','对话最大宽度':'Chat maximum width','精确宽度（px）':'Exact width (px)','保持字号不变，调节对话内容的最大宽度。窄窗口自动收缩，输入框可能随之变宽。':'Adjust the maximum chat width without changing font size. Narrow windows shrink automatically; the composer may widen too.'});
+Object.assign(english,{'设置':'Settings','设置界面':'SETTINGS','设置界面预览':'Settings preview','常规':'General','通知':'Notifications','启动时打开':'Open at startup','外观':'Appearance','主题':'Theme','跟随当前配色':'Current colors','文字大小':'Text size','默认':'Default','简体中文⌄':'Simplified Chinese⌄','设置遮罩颜色':'Settings overlay color','设置遮罩强度':'Settings overlay strength','设置毛玻璃模糊':'Settings frosted-glass blur','复用对话背景，单独调整设置内容区的遮罩。侧栏沿用侧栏背景配置。':'Use the chat background with an independent overlay for settings content. The sidebar keeps its own background settings.'});
 const chinese=Object.fromEntries(Object.entries(english).map(([zh,en])=>[en,zh]));
 let locale=localStorage.getItem('background-studio-language')||'en';
 const t=text=>(locale==='en'?english[text]:chinese[text])||text;
@@ -54,6 +56,11 @@ async function compressLargeImage(file,matte){
  throw Error('图片压缩后仍超过 6MB，请选择尺寸更小的图片');
 }
 function slider(id,label,min,max,step=1,unit='%'){return `<label class="slider"><div><span>${label}</span><output id="${id}Value"></output></div><input aria-label="${label}" id="${id}" type="range" min="${min}" max="${max}" step="${step}" data-unit="${unit}"></label>`;}
+$('chatWidthSlider').innerHTML=slider('chatMaxWidth','对话最大宽度',480,2400,1,'px');
+$('nativeChatWidth').onchange=()=>{config.chatMaxWidth=$('nativeChatWidth').checked?null:Number($('chatMaxWidth').value);changed();};
+$('chatMaxWidth').oninput=()=>{config.chatMaxWidth=Number($('chatMaxWidth').value);$('chatMaxWidthNumber').value=config.chatMaxWidth;changed();};
+$('chatMaxWidthNumber').oninput=()=>{if(!$('chatMaxWidthNumber').value||!$('chatMaxWidthNumber').checkValidity())return;config.chatMaxWidth=Number($('chatMaxWidthNumber').value);$('chatMaxWidth').value=config.chatMaxWidth;changed();};
+$('chatMaxWidthNumber').onchange=()=>{$('chatMaxWidthNumber').value=config.chatMaxWidth??768;};
 $('imageSliders').innerHTML=slider('x','水平位置',0,100)+slider('y','垂直位置',0,100)+slider('zoom','画面缩放',100,180)+slider('blur','图片模糊',0,30,1,'px');
 $('imageControls').insertAdjacentHTML('afterbegin','<label class="toggle"><input id="flipX" type="checkbox">水平翻转图片</label>');
 document.querySelector('.recovery-panel')?.insertAdjacentHTML('beforeend','<button id="restartService">重启后台服务</button>');
@@ -62,12 +69,21 @@ $('globalSliders').innerHTML=slider('panelOpacity','输入框不透明度',0,100
 for(const [id,label]of Object.entries({menuBg:'顶部菜单栏背景',menuInk:'顶部菜单栏文字',ink:'主要文字',muted:'次要文字',accent:'强调色',sidebarInk:'侧栏文字',panel:'输入框 / 代码块 / 消息'})){$('globalColors').insertAdjacentHTML('beforeend',`<div class="color-row"><label>${label}<input aria-label="${label}" id="${id}" type="color"></label></div>`);}
 $('sharedSliders').innerHTML=slider('sidebarOverlay','侧栏遮罩强度',0,100)+slider('sidebarBlur','毛玻璃模糊',0,30,1,'px');
 $('workspaceHeaderSliders').innerHTML=slider('workspaceHeaderOverlay','顶部工作空间遮罩强度',0,100)+slider('workspaceHeaderBlur','顶部工作空间毛玻璃模糊',0,30,1,'px');
+$('settingsSliders').innerHTML=slider('settingsOverlay','设置遮罩强度',0,100)+slider('settingsBlur','设置毛玻璃模糊',0,30,1,'px');
+$('settingsWash').oninput=()=>{config.settingsWash=$('settingsWash').value;page='settings';changed();};
+for(const k of ['settingsOverlay','settingsBlur'])$(k).oninput=()=>{config[k]=Number($(k).value);page='settings';changed();};
 $('sidebarShared').onchange=()=>{config.sidebarShared=$('sidebarShared').checked;changed();};
 $('sidebarWash').oninput=()=>{config.sidebar.wash=$('sidebarWash').value;changed();};
 for(const k of ['sidebarOverlay','sidebarBlur'])$(k).oninput=()=>{config[k]=Number($(k).value);changed();};
 $('workspaceHeaderWash').oninput=()=>{config.workspaceHeaderWash=$('workspaceHeaderWash').value;changed();};
 for(const k of ['workspaceHeaderOverlay','workspaceHeaderBlur'])$(k).oninput=()=>{config[k]=Number($(k).value);changed();};
 function fill(){
+ config.settingsWash??=config.panel??base.settingsWash;config.settingsOverlay??=base.settingsOverlay;config.settingsBlur??=base.settingsBlur;
+ for(const k of ['settingsWash','settingsOverlay','settingsBlur'])$(k).value=config[k];
+ config.chatMaxWidth??=null;
+ $('chatWidthControls').hidden=region!=='chat';
+ $('nativeChatWidth').checked=config.chatMaxWidth===null;
+ $('chatMaxWidth').value=config.chatMaxWidth??768;$('chatMaxWidthNumber').value=config.chatMaxWidth??768;
  config.userMessageOpacity??=0;config.replyOpacity??=0;config.sidebarShared??=false;config.sidebarOverlay??=0;config.sidebarBlur??=0;config.workspaceHeaderWash??=base.workspaceHeaderWash;config.workspaceHeaderOverlay??=base.workspaceHeaderOverlay;config.workspaceHeaderBlur??=base.workspaceHeaderBlur;
  $('sidebarShared').checked=config.sidebarShared;$('sidebarWash').value=config.sidebar.wash;$('sidebarOverlay').value=config.sidebarOverlay;$('sidebarBlur').value=config.sidebarBlur;
  $('workspaceHeaderWash').value=config.workspaceHeaderWash;$('workspaceHeaderOverlay').value=config.workspaceHeaderOverlay;$('workspaceHeaderBlur').value=config.workspaceHeaderBlur;
@@ -83,6 +99,7 @@ function fill(){
  visibility();preview();
 }
 function visibility(){
+ $('customChatWidth').hidden=config.chatMaxWidth===null;
  if(region!=='global'){
   const r=config[region];$('sharedSettings').hidden=!config.sidebarShared;$('regionFields').hidden=(region==='chat'&&config.sync)||(region==='sidebar'&&config.sidebarShared);$('uploadBox').hidden=r.type!=='image';$('imageControls').hidden=r.type!=='image';$('color2Wrap').hidden=r.type!=='gradient';
  }
@@ -96,6 +113,7 @@ const paint=(el,r)=>{
  el.querySelector('.wash').style.background=rgba(r.wash,r.washOpacity/100);
 };
 function preview(){
+ $('sampleChat').style.setProperty('--preview-chat-width',((config.chatMaxWidth??768)/2)+'px');
  $('menuPreview').style.background=config.menuBg;$('menuPreview').style.color=config.menuInk;
  const mainRegion=page==='home'||config.sync?config.home:config.chat;
  paint($('mockSidebar'),config.sidebar);paint($('mockMain'),mainRegion);
@@ -103,6 +121,9 @@ function preview(){
  if(config.sidebarShared){paint($('mock'),mainRegion);$('mockMain').style.background='transparent';$('mockSidebar').style.background=rgba(config.sidebar.wash,config.sidebarOverlay/100);}else{$('mock').style.background='';}
  $('mockSidebar').style.backdropFilter=config.sidebarShared?'blur('+config.sidebarBlur+'px)':'none';
  $('mockSidebar').style.color=config.sidebarInk;$('mockMain').style.color=config.ink;
+ $('sampleSettings').hidden=page!=='settings';
+ document.querySelector('.mock-composer').hidden=page==='settings';
+ Object.assign($('sampleSettings').style,{background:rgba(config.settingsWash,config.settingsOverlay/100),backdropFilter:'blur('+config.settingsBlur+'px)'});
  $('sampleHome').hidden=page!=='home';$('sampleChat').hidden=page!=='chat';
  document.querySelectorAll('#previewTabs button').forEach(b=>b.classList.toggle('selected',b.dataset.page===page));
  document.querySelector('.user-bubble').style.backgroundColor=rgba(config.panel,config.userMessageOpacity/100);

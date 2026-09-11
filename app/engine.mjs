@@ -4,12 +4,18 @@ import {fileURLToPath} from 'node:url';
 import {validateThemePackage} from './core/src/index.mjs';
 import {isValidBase64} from './core/src/theme/base64.mjs';
 export const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+// Match the native settings navigation and its own scrolling surface.
+export const SETTINGS_SURFACE='html.codedrobe-host-codex:has(aside.app-shell-left-panel nav.sidebar-navigation) main.border-l-hairline [class~="electron:bg-surface"]:has(> .scrollbar-stable.overflow-y-auto.p-panel)';
 export const region=()=>({type:'gradient',color:'#eef7ff',color2:'#dcecff',image:null,opacity:100,wash:'#eef7ff',washOpacity:65,blur:0,x:80,y:50,fit:'cover',zoom:100,flipX:false});
-export const defaults=()=>({schema:1,name:'Azure glow',mode:'light',menuBg:'#98bce2',menuInk:'#203653',ink:'#203653',muted:'#576c85',accent:'#6e60b7',sidebarInk:'#e5f4ff',panel:'#f8fcff',panelOpacity:94,codeOpacity:92,replyOpacity:0,userMessageOpacity:0,workspaceHeaderWash:'#f8fcff',workspaceHeaderOverlay:84,workspaceHeaderBlur:18,sync:true,home:region(),chat:{...region(),washOpacity:80},sidebar:{...region(),type:'gradient',color:'#193657',color2:'#122743',wash:'#142a49',washOpacity:35}});
+export const defaults=()=>({schema:1,settingsWash:'#f8fcff',settingsOverlay:65,settingsBlur:12,chatMaxWidth:null,name:'Azure glow',mode:'light',menuBg:'#98bce2',menuInk:'#203653',ink:'#203653',muted:'#576c85',accent:'#6e60b7',sidebarInk:'#e5f4ff',panel:'#f8fcff',panelOpacity:94,codeOpacity:92,replyOpacity:0,userMessageOpacity:0,workspaceHeaderWash:'#f8fcff',workspaceHeaderOverlay:84,workspaceHeaderBlur:18,sync:true,home:region(),chat:{...region(),washOpacity:80},sidebar:{...region(),type:'gradient',color:'#193657',color2:'#122743',wash:'#142a49',washOpacity:35}});
 const color=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);
 export function validate(c){
  if(!c||c.schema!==1)throw Error('不支持的预设格式');
- c=structuredClone(c);c.menuBg??=defaults().menuBg;c.menuInk??=defaults().menuInk;
+ c=structuredClone(c);
+ c.settingsWash??=c.panel??'#f8fcff';c.settingsOverlay??=65;c.settingsBlur??=12;
+ if(!color(c.settingsWash)||!Number.isFinite(c.settingsOverlay)||c.settingsOverlay<0||c.settingsOverlay>100||!Number.isFinite(c.settingsBlur)||c.settingsBlur<0||c.settingsBlur>30)throw Error('设置界面遮罩参数无效');
+ c.chatMaxWidth??=null;
+ if(c.chatMaxWidth!==null&&(!Number.isInteger(c.chatMaxWidth)||c.chatMaxWidth<480||c.chatMaxWidth>2400))throw Error('对话最大宽度需要为 480–2400 的整数');c.menuBg??=defaults().menuBg;c.menuInk??=defaults().menuInk;
  c.userMessageOpacity??=defaults().userMessageOpacity;c.replyOpacity??=defaults().replyOpacity;c.sidebarShared??=false;c.sidebarOverlay??=0;c.sidebarBlur??=0;
  c.workspaceHeaderWash??=defaults().workspaceHeaderWash;c.workspaceHeaderOverlay??=defaults().workspaceHeaderOverlay;c.workspaceHeaderBlur??=defaults().workspaceHeaderBlur;
  if(typeof c.sidebarShared!=='boolean'||!Number.isFinite(c.sidebarOverlay)||c.sidebarOverlay<0||c.sidebarOverlay>100||!Number.isFinite(c.sidebarBlur)||c.sidebarBlur<0||c.sidebarBlur>30)throw Error('共用背景参数无效');
@@ -72,8 +78,15 @@ export async function makeBundle(input){
  const rightTabs=`${m} [data-app-shell-tab-row]:has([data-app-shell-tab-strip-controller="right"])`;
  const rightToolbar=`${m} [data-app-shell-tab-panel-controller="right"] .h-toolbar-pane:not([data-app-shell-tab-row])`;
  const pinnedSummary=`${h} .bg-surface-elevated-secondary.rounded-3xl:has([data-slot="thread-summary-panel-item-button"])`;
+ const homeSuggestionCards=`${m} section[class~="group/home-suggestions"] button[class~="bg-surface"][aria-labelledby]`;
  const chromeWash=rgba(c.workspaceHeaderWash,c.workspaceHeaderOverlay/100);
- const css=`${h}{color-scheme:${c.mode}!important;
+ const chromeWashSoft=rgba(c.workspaceHeaderWash,c.workspaceHeaderOverlay/200);
+ const widthCSS=c.chatMaxWidth===null?'':`${m},${m} [class*="--thread-content-max-width:"]:not(aside[data-app-shell-focus-area="right-panel"] *){--thread-content-max-width:${c.chatMaxWidth}px!important;}`;
+ const css=`${widthCSS}
+ /* The existing wallpaper sits behind this settings surface. Paint one wash,
+    and clear only the native settings-card token, preserving control states. */
+ ${SETTINGS_SURFACE}{background:${rgba(c.settingsWash,c.settingsOverlay/100)}!important;backdrop-filter:blur(${c.settingsBlur}px);-webkit-backdrop-filter:blur(${c.settingsBlur}px);--color-background-panel:transparent;}
+ ${h}{color-scheme:${c.mode}!important;
  --color-token-bg-primary:${c.home.color}!important;--color-token-main-surface-primary:${c.home.color}!important;
  --color-token-bg-secondary:${panel}!important;--color-token-bg-tertiary:${rgba(c.panel,.8)}!important;
  --color-token-side-bar-background:${c.sidebar.color}!important;
@@ -111,7 +124,11 @@ export async function makeBundle(input){
     Put glass on its flexible workspace section only, so controls rendered in
     the sidebar section (such as Enter fullscreen) remain crisp. */
  ${m}>header,${m} header.app-header-tint{background:transparent!important;color:${c.ink}!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
- ${m}>header>div[class~="flex-1"],${m} header.app-header-tint>div[class~="flex-1"]{background:${rgba(c.workspaceHeaderWash,c.workspaceHeaderOverlay/100)}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
+ ${m}>header>div[class~="flex-1"],${m} header.app-header-tint>div[class~="flex-1"]{position:relative;background:transparent!important;}
+ ${m}>header>div[class~="flex-1"]::before,${m} header.app-header-tint>div[class~="flex-1"]::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 88% 145% at 50% -35%,${chromeWash} 0%,${chromeWashSoft} 66%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 88% 145% at 50% -35%,#000 0%,rgba(0,0,0,.72) 66%,transparent 100%);mask-image:radial-gradient(ellipse 88% 145% at 50% -35%,#000 0%,rgba(0,0,0,.72) 66%,transparent 100%);backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
+ /* Edge-scroll mode paints opaque native toolbar groups above the glass.
+    Clear the group surfaces only; button hover/focus backgrounds stay native. */
+ ${m} header [data-app-shell-header-toolbar]>div{background:transparent!important;}
  /* Native panel wrappers share this dedicated token. Keep general surface and
     component theme tokens intact so terminal, file tree and WebView content
     retain their own backgrounds. The main shell already owns the wallpaper. */
@@ -126,13 +143,17 @@ export async function makeBundle(input){
     paint an opaque elevated surface over it. */
  ${pinnedSummary}{background:${panel}!important;border-color:${line}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
  ${pinnedSummary} header.bg-surface-elevated-secondary,${pinnedSummary} header.bg-surface-elevated-secondary::before{background:transparent!important;}
+ /* The project new-chat page renders its four starter choices as home
+    suggestion cards. Give those native cards the configured panel wash too;
+    the section and accessibility attributes keep the rule off ordinary
+    workspace buttons and the compact suggestion-list variant. */
+ ${homeSuggestionCards}{background:${panel}!important;border-color:${line}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
  ${h} .composer-surface-chrome{background:${panel}!important;border-color:${line}!important;color:${c.ink}!important;}
- ${m} [class*="_ComposerLayoutRoot_"]:has(.ProseMirror[contenteditable="true"]){background:${panel}!important;}
- /* ChatGPT Chat ships an additional nearly-opaque body inside the composer.
-    Let the configured root panel be the single glass layer in that layout. */
- ${m} [class*="_ComposerLayoutBody_"]:has(.ProseMirror[contenteditable="true"]){background:transparent!important;}
- ${m}:has(.dream-home) [class*="_ComposerLayoutRoot_"]:has(.ProseMirror[contenteditable="true"]){background:transparent!important;}
- ${m}:has(.dream-home) [class*="_ComposerLayoutBody_"]:has(.ProseMirror[contenteditable="true"]){background:${panel}!important;}
+ /* Keep the native rounded composer body as the only painted surface.  The
+    outer layout root is rectangular in ChatGPT's new-chat view; painting it
+    as well creates a visible second, square overlay around the composer. */
+ ${m} [class*="_ComposerLayoutRoot_"]:has(.ProseMirror[contenteditable="true"]){background:transparent!important;}
+ ${m} [class*="_ComposerLayoutBody_"]:has(.ProseMirror[contenteditable="true"]){background:${panel}!important;border-color:${line}!important;}
  /* Scheduled tasks and Plugins share a sticky search tray. Remove its native
     opaque surface/fade and let the search field use the configured glass. */
  ${m} .sticky.z-30.bg-surface:has(input.bg-transparent){background:transparent!important;}
@@ -144,6 +165,10 @@ export async function makeBundle(input){
  ${h} [data-codex-composer-request-navigation]{background:${panel}!important;border-color:${line}!important;}
  ${h} .composer-surface-chrome :is(textarea,.ProseMirror){color:${c.ink}!important;caret-color:${c.accent};}
  ${m} [data-markdown-text-style="assistant-message"]{background-color:${rgba(c.panel,c.replyOpacity/100)}!important;border-radius:10px;}
+ /* Markdown files open in the right-side CodeMirror panel. Reuse the reply
+    wash exactly so the editor stays readable and follows the same opacity
+    control without painting terminals or non-Markdown file panels. */
+ ${m} .cm-editor:has(.file-editor-heading,.cm-markdown-list-item,.cm-markdown-code-line){background-color:${rgba(c.panel,c.replyOpacity/100)}!important;}
  /* The native bubble owns the only user-message background, including its padding. */
  ${m} .bg-user-message{background-color:${rgba(c.panel,c.userMessageOpacity/100)}!important;}
  ${m} [data-markdown-text-tone="user-message"]{background-color:transparent!important;}

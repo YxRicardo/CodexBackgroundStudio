@@ -10,6 +10,7 @@ The interface defaults to English and includes an in-app English / Chinese langu
 - Use a solid color, gradient, or PNG/JPEG/WebP image (up to 6 MB; oversized PNGs are converted to JPEG and oversized JPEGs are compressed automatically).
 - Adjust image position, zoom, blur, opacity, and overlay strength.
 - Independently adjust the workspace title bar’s overlay color, strength, and frosted-glass blur.
+- Set chat maximum width (480–2400 px) under Chat background, or keep the native width. Width is saved with looks and adapts to narrower windows.
 - Share a continuous background between the main content and sidebar.
 - Preview changes locally before applying them to Codex.
 - Save, import, export, and switch between local looks.
@@ -67,6 +68,7 @@ Codex Background Studio 是一款 Windows 本地编辑器，用于配置 Codex �
 - 支持纯色、渐变或 PNG/JPEG/WebP 图片（最大 6 MB；超限 PNG 会自动转换为 JPEG，超限 JPEG 会自动压缩）。
 - 调节图片位置、缩放、模糊、透明度和遮罩强度。
 - 单独调节工作空间顶部标题栏的遮罩颜色、强度和毛玻璃模糊。
+- 在“对话背景”中通过滑块或数字输入调节对话最大宽度（480–2400 px），也可保持原生宽度；设置随方案保存，窄窗口自动收缩。
 - 让主内容区和侧栏共用连续背景。
 - 在应用到 Codex 前先进行本地预览。
 - 在本机保存、导入、导出和切换方案。
@@ -109,3 +111,9 @@ node .\app\server.mjs
 ## 许可证与声明
 
 项目使用 Apache-2.0 许可证发布。完整条款见 [app/core/LICENSE](app/core/LICENSE)；[app/core/NOTICE](app/core/NOTICE) 保留了内置 CodeDrobe Core 兼容代码的声明。
+
+### Settings transparency / 设置界面透明遮罩
+
+Under **Colors & panels → Settings**, adjust the settings overlay color, strength and blur independently. The **Settings** preview tab uses the current chat wallpaper. Settings cards keep their borders and controls; the sidebar uses its existing background configuration. Existing looks default to a 65% overlay and 12px blur.
+
+在 **配色与面板 → 设置界面** 中独立调整遮罩颜色、强度和毛玻璃模糊；预览区新增 **设置** 标签。设置页复用当前对话壁纸，保留卡片边框与控件，侧栏沿用原有背景配置。旧方案默认使用 65% 遮罩和 12px 模糊。
