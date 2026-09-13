@@ -48,6 +48,8 @@ No personal files or preconfigured user theme are included in the repository.
 
 ## Compatibility
 
+Compatibility update (2026-09-11): Windows Codex 26.908.4834.0 replaced the main surface's utility classes. Background Studio now locates it through the native header landmark, including shared sidebar wallpaper and settings rules. Live chat, wallpaper, shell alignment and overflow checks passed on this version; home and settings were not visually rechecked. Run `node app/verify-compatibility.mjs` with a theme applied to check old/new DOM fixtures and the current renderer.
+
 The project was developed against Codex for Windows 26.901.6511.0. Codex UI updates can change the page structure and may require compatibility updates. The project has been tested on home and chat pages, including shared sidebar backgrounds; every Codex release, third-party theme, and menu state is not guaranteed.
 
 ## License and notices
@@ -105,6 +107,8 @@ node .\app\server.mjs
 仓库不包含个人文件或预先配置的用户主题。
 
 ## 兼容性
+
+2026-09-11 兼容更新：Windows Codex 26.908.4834.0 更换了主内容区类名。现已改用原生标题栏标记定位，并同步修复侧栏共用背景和设置页样式的定位。已在该版本实测当前对话页的背景、主区域对齐和横向溢出；首页与设置页未重新进行视觉验证。应用主题后，可运行 `node app/verify-compatibility.mjs` 检查新旧页面结构样例和当前窗口。
 
 项目基于 Windows 版 Codex 26.901.6511.0 开发。Codex UI 更新可能改变页面结构，届时可能需要更新兼容逻辑。项目已测试首页、对话页和侧栏共用背景；不保证兼容每个 Codex 版本、第三方主题或菜单状态。
 

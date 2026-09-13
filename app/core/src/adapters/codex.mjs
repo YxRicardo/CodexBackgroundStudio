@@ -7,7 +7,7 @@ const codex = {
   defaultPort: 9335,
   lastVerified: {
     darwin: { appVersion: "26.707.72221", build: "5307", verifiedAt: "2026-07-16" },
-    win32: { appVersion: "26.903.8094.0", verifiedAt: "2026-09-09" },
+    win32: { appVersion: "26.908.4834.0", verifiedAt: "2026-09-11" },
   },
   rendererProfiles: {
     [codexThemeV1Profile.id]: codexThemeV1Profile,
@@ -33,7 +33,7 @@ const codex = {
     // The root landmark is the only blocking check: it doubles as the
     // "app finished booting" signal and the minimal app fingerprint. Everything
     // else warns — the sidebar collapses, and CSS is inert on absent nodes.
-    rootAny: ["main.main-surface", "main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface'])"],
+    rootAny: ["main.main-surface", "main:has([data-testid='app-shell-header-context-menu-surface'])"],
     recommended: [
       { name: "sidebar", any: ["aside.app-shell-left-panel"] },
       { name: "composer", any: [".composer-surface-chrome", "main .ProseMirror[contenteditable=\"true\"]"] },

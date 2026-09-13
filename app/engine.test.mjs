@@ -6,9 +6,9 @@ test('workspace glass fades at the edges of the main split-header section', asyn
   const bundle=await makeBundle(defaults());
   const css=bundle.targets.codex.css;
 
-  assert.match(css,/main\.border-l-hairline[^,{]*>header,[^{]*main\.border-l-hairline[^,{]* header\.app-header-tint\{[^}]*backdrop-filter:none!important/);
-  assert.match(css,/main\.border-l-hairline[^,{]*>header>div\[class~="flex-1"\],[^{]*main\.border-l-hairline[^,{]* header\.app-header-tint>div\[class~="flex-1"\]\{[^}]*background:transparent!important/);
-  assert.match(css,/main\.border-l-hairline[^,{]*>header>div\[class~="flex-1"\]::before,[^{]*main\.border-l-hairline[^,{]* header\.app-header-tint>div\[class~="flex-1"\]::before\{[^}]*radial-gradient\([^}]*rgba\(248,252,255,0\.84\)[^}]*rgba\(248,252,255,0\.42\)[^}]*transparent 100%\)[^}]*backdrop-filter:blur\(18px\)/);
+  assert.match(css,/main[^,{]*>header,[^{]*main[^,{]* header\.app-header-tint\{[^}]*backdrop-filter:none!important/);
+  assert.match(css,/main[^,{]*>header>div\[class~="flex-1"\],[^{]*main[^,{]* header\.app-header-tint>div\[class~="flex-1"\]\{[^}]*background:transparent!important/);
+  assert.match(css,/main[^,{]*>header>div\[class~="flex-1"\]::before,[^{]*main[^,{]* header\.app-header-tint>div\[class~="flex-1"\]::before\{[^}]*radial-gradient\([^}]*rgba\(248,252,255,0\.84\)[^}]*rgba\(248,252,255,0\.42\)[^}]*transparent 100%\)[^}]*backdrop-filter:blur\(18px\)/);
   assert.match(css,/-webkit-mask-image:radial-gradient\([^}]*rgba\(0,0,0,\.72\)[^}]*transparent 100%\)/);
   assert.doesNotMatch(css,/html\.codedrobe-host-codex header\.app-header-tint\{/);
 });
@@ -71,8 +71,8 @@ test('shared background uses the full-width sidebar and main parent with valid :
   config.sidebarShared=true;
   const css=(await makeBundle(config)).targets.codex.css;
 
-  assert.match(css,/html\.codedrobe-host-codex div:has\(>aside\.app-shell-left-panel\):has\(>div>main\.border-l-hairline\)\{/);
-  assert.doesNotMatch(css,/div:has\(>main\.border-l-hairline:has\(/);
+  assert.match(css,/html\.codedrobe-host-codex div:has\(>aside\.app-shell-left-panel\):has\(>div>main\)\{/);
+  assert.doesNotMatch(css,/div:has\(>main:has\(/);
   assert.doesNotMatch(css,/div:has\([^)]*:has\(/);
-  assert.match(css,/div:has\(>aside\.app-shell-left-panel\):has\(>div>main\.border-l-hairline\) main\.border-l-hairline[^,{]*::before,[^{]*div:has\(>aside\.app-shell-left-panel\):has\(>div>main\.border-l-hairline\) main\.border-l-hairline[^,{]*::after\{content:none/);
+  assert.match(css,/div:has\(>aside\.app-shell-left-panel\):has\(>div>main\) main[^,{]*::before,[^{]*div:has\(>aside\.app-shell-left-panel\):has\(>div>main\) main[^,{]*::after\{content:none/);
 });

@@ -5,7 +5,7 @@ import {validateThemePackage} from './core/src/index.mjs';
 import {isValidBase64} from './core/src/theme/base64.mjs';
 export const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 // Match the native settings navigation and its own scrolling surface.
-export const SETTINGS_SURFACE='html.codedrobe-host-codex:has(aside.app-shell-left-panel nav.sidebar-navigation) main.border-l-hairline [class~="electron:bg-surface"]:has(> .scrollbar-stable.overflow-y-auto.p-panel)';
+export const SETTINGS_SURFACE='html.codedrobe-host-codex:has(aside.app-shell-left-panel nav.sidebar-navigation) main:has([data-testid="app-shell-header-context-menu-surface"]) [class~="electron:bg-surface"]:has(> .scrollbar-stable.overflow-y-auto.p-panel)';
 export const region=()=>({type:'gradient',color:'#eef7ff',color2:'#dcecff',image:null,opacity:100,wash:'#eef7ff',washOpacity:65,blur:0,x:80,y:50,fit:'cover',zoom:100,flipX:false});
 export const defaults=()=>({schema:1,settingsWash:'#f8fcff',settingsOverlay:65,settingsBlur:12,chatMaxWidth:null,name:'Azure glow',mode:'light',menuBg:'#98bce2',menuInk:'#203653',ink:'#203653',muted:'#576c85',accent:'#6e60b7',sidebarInk:'#e5f4ff',panel:'#f8fcff',panelOpacity:94,codeOpacity:92,replyOpacity:0,userMessageOpacity:0,workspaceHeaderWash:'#f8fcff',workspaceHeaderOverlay:84,workspaceHeaderBlur:18,sync:true,home:region(),chat:{...region(),washOpacity:80},sidebar:{...region(),type:'gradient',color:'#193657',color2:'#122743',wash:'#142a49',washOpacity:35}});
 const color=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);
@@ -62,11 +62,11 @@ export async function makeBundle(input){
   const [,mime,base64]=data.match(/^data:([^;]+);base64,(.*)$/s);
   images[k]={filename:k+'.'+({ 'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[mime]),mimeType:mime,base64};
  }
- const h='html.codedrobe-host-codex',mainAnchor=`main.border-l-hairline:has([data-testid='app-shell-header-context-menu-surface'])`,m=`${h} ${mainAnchor}`,s=`${h} aside.app-shell-left-panel`;
+ const h='html.codedrobe-host-codex',mainAnchor=`main:has([data-testid='app-shell-header-context-menu-surface'])`,m=`${h} ${mainAnchor}`,s=`${h} aside.app-shell-left-panel`;
  // Select the full-width flex row that directly owns the sidebar and the main
  // clip. Keep :has() calls sequential: CSS forbids nesting :has() inside
  // another :has(), and newer Codex Chromium releases reject such rules.
- const shell=`${h} div:has(>aside.app-shell-left-panel):has(>div>main.border-l-hairline)`;
+ const shell=`${h} div:has(>aside.app-shell-left-panel):has(>div>main)`;
  const shared=c.sidebarShared?`${regionCSS(shell,c.sync?c.home:c.chat,'chat')}
  ${regionCSS(`${shell}:has(.dream-home)`,c.home,'home')}
  ${shell} ${mainAnchor}{background:transparent!important;}

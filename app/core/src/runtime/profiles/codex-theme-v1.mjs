@@ -48,7 +48,7 @@ function runtime({ theme, imageDataUrls = {}, imageUrls = {}, artDataUrl, artUrl
     root.style.setProperty("--dream-project-prefix", cssString(copy.projectPrefix));
     root.style.setProperty("--dream-project-label", cssString(copy.projectLabel));
 
-    const shellMain = document.querySelector("main.main-surface") || document.querySelector("main.border-l-hairline") || document.querySelector("main");
+    const shellMain = document.querySelector("main:has([data-testid='app-shell-header-context-menu-surface'])") || document.querySelector("main.main-surface");
     const home = document.querySelector('[class~="[container-name:home-main-content]"]:has([data-feature="game-source"])') || document.querySelector('[role="main"]:has([data-testid="home-icon"])');
     for (const candidate of document.querySelectorAll('.dream-home')) {
       if (candidate !== home) candidate.classList.remove("dream-home");
