@@ -5,6 +5,8 @@ import crypto from 'node:crypto';
 import {execFile,spawn} from 'node:child_process';
 import {promisify} from 'node:util';
 import {ROOT,defaults,validate,makeBundle} from './engine.mjs';
+import {createConnectionMonitor,createDiagnosticLog} from './connection-monitor.mjs';
+import {listCdpTargets} from './core/src/cdp/session.mjs';
 import {getAdapter,probeApp,applyTheme,verifyTheme,watchTheme,resolveThemeTarget,restoreSkin,launchApp,findRunningPids} from './core/src/index.mjs';
 const exec=promisify(execFile),adapter=getAdapter('codex'),port=9335,HTTP_PORT=47831,token=crypto.randomBytes(32).toString('hex');
 const data=path.join(ROOT,'data');await fs.mkdir(data,{recursive:true});
@@ -13,7 +15,7 @@ const read=async(name,fallback)=>{try{return JSON.parse(await fs.readFile(path.j
 const write=async(name,value)=>{const dest=path.join(data,name);await fs.writeFile(dest+'.tmp',JSON.stringify(value,null,2));await fs.rename(dest+'.tmp',dest);};
 let config=validate(await read('config.json',defaults())),active=await read('active.json',null),previous=await read('previous.json',null),enabled=await read('enabled.json',false),watch=null,watchDone=null,lastError=null,chain=Promise.resolve();
 let activeConfig=await read('active-config.json',config);
-let reconnecting=false,lastReconnectAttempt=0;
+const diagnosticLog=createDiagnosticLog(path.join(ROOT,'work','connection-diagnostics.jsonl'));
 let restarting=false;
 const serial=fn=>{const job=chain.then(fn);chain=job.catch(()=>{});return job;};
 async function stopWatch(){if(watch){watch.abort();await watchDone;watch=null;watchDone=null;}}
@@ -24,17 +26,14 @@ async function autoStartStatus(){
   return {enabled:Boolean(JSON.parse(stdout).enabled)};
  }catch(e){return {enabled:false,error:e.message};}
 }
-async function maintainRestartPersistence(){
- if(!enabled||!active||reconnecting||Date.now()-lastReconnectAttempt<120000)return;
- try{
-  if(!(await findRunningPids(adapter)).length)return;
-  try{await probeApp({adapter,port,timeoutMs:1200});return;}catch{}
-  reconnecting=true;lastReconnectAttempt=Date.now();
-  await launchApp({adapter,port,restartExisting:true,timeoutMs:30000});
-  lastError=null;
- }catch(e){lastError=e.message;}
- finally{reconnecting=false;}
-}
+// watchTheme retries injection when CDP returns. Monitoring is read-only and
+// deliberately avoids renderer evaluation (a busy renderer is not a dead app).
+const monitorConnection=createConnectionMonitor({
+ isEnabled:()=>enabled&&active&&!restarting,
+ findPids:()=>findRunningPids(adapter),
+ probe:async()=>{const targets=await listCdpTargets(port,1500);if(!targets.some(target=>adapter.matchTarget(target)))throw Error('No matching Codex target; waiting for connection.');},
+ log:diagnosticLog,
+});
 function restartService(){
  if(restarting)return {ok:true,restarting:true};
  restarting=true;
@@ -68,7 +67,7 @@ async function api(route,b){
  switch(route){
   case '/api/status':return status();
   case '/api/restart':return restartService();
- case '/api/connect':{const s=await status();if(s.connected)return s;await launchApp({adapter,port,restartExisting:true,timeoutMs:30000});return status();}
+ case '/api/connect':{const s=await status();if(s.connected)return s;await diagnosticLog({type:'manual-connect',action:'launch-or-restart'});await launchApp({adapter,port,restartExisting:true,timeoutMs:30000});return status();}
  case '/api/config':return {config,defaults:defaults(),presets:await read('presets.json',[])};
  case '/api/save':config=validate(b.config);await write('config.json',config);return {ok:true};
  case '/api/apply':return apply(await makeBundle(b.config),validate(b.config));
@@ -111,4 +110,4 @@ const server=http.createServer(async(req,res)=>{
  }catch(e){res.writeHead(400,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify({error:e.message}));}
 });
 server.on('error',e=>{console.error(e.message);process.exit(1);});
-server.listen(HTTP_PORT,'127.0.0.1',async()=>{await write('server.json',{pid:process.pid,port:HTTP_PORT,root:ROOT});console.log('Background Studio http://127.0.0.1:'+HTTP_PORT);if(enabled&&active)await startWatch(active);const timer=setInterval(()=>maintainRestartPersistence(),5000);timer.unref();});
+server.listen(HTTP_PORT,'127.0.0.1',async()=>{await write('server.json',{pid:process.pid,port:HTTP_PORT,root:ROOT});console.log('Background Studio http://127.0.0.1:'+HTTP_PORT);await diagnosticLog({type:'service-start',policy:'never-auto-restart'});if(enabled&&active)await startWatch(active);const timer=setInterval(()=>monitorConnection(),5000);timer.unref();});

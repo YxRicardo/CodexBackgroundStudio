@@ -75,6 +75,8 @@ export async function makeBundle(input){
  ${s}::before,${s}::after{content:none!important;}`:'';
  const panel=rgba(c.panel,c.panelOpacity/100),line=rgba(c.ink,.18);
  const rightPanel=`${m} aside[data-app-shell-focus-area="right-panel"]`;
+ // The launcher has an empty tab strip and no mounted feature panel.
+ const rightLauncher=`${rightPanel}:has([data-app-shell-tab-strip-controller="right"]):not(:has([role="tab"],[data-app-shell-tab-panel-controller="right"]))`;
  const rightTabs=`${m} [data-app-shell-tab-row]:has([data-app-shell-tab-strip-controller="right"])`;
  const rightToolbar=`${m} [data-app-shell-tab-panel-controller="right"] .h-toolbar-pane:not([data-app-shell-tab-row])`;
  const pinnedSummary=`${h} .bg-surface-elevated-secondary.rounded-3xl:has([data-slot="thread-summary-panel-item-button"])`;
@@ -134,6 +136,11 @@ export async function makeBundle(input){
     retain their own backgrounds. The main shell already owns the wallpaper. */
  ${rightPanel}{--app-shell-panel-background:transparent!important;}
  ${rightTabs},${rightToolbar}{background:${chromeWash}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
+ /* Only the initial launcher is clear; opening any feature restores its wash. */
+ ${rightLauncher} [data-app-shell-tab-row],${rightLauncher} .bg-surface{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+ /* Each native tab paints an opaque base and a separate selected/hover wash.
+    Let the row own the glass, and retain the native state layer as a tint. */
+ ${rightTabs} [data-app-shell-tab-controller="right"] [data-tab-id][class~="group/tab"]{background:transparent!important;--app-shell-tab-background:${rgba(c.ink,.10)}!important;}
  /* Only tab-strip chrome: preserve selected/hovered tabs and button states.
     Native overflow fades and the pinned add-tab tray otherwise paint solid strips. */
  ${rightTabs} [data-app-shell-tab-strip-controller="right"] .sticky>.bg-surface{background:transparent!important;}
