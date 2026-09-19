@@ -138,6 +138,8 @@ export async function makeBundle(input){
  ${rightTabs},${rightToolbar}{background:${chromeWash}!important;backdrop-filter:blur(${c.workspaceHeaderBlur}px);-webkit-backdrop-filter:blur(${c.workspaceHeaderBlur}px);}
  /* Only the initial launcher is clear; opening any feature restores its wash. */
  ${rightLauncher} [data-app-shell-tab-row],${rightLauncher} .bg-surface{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+ /* Newer Codex places each launcher's wash on a wrapper around its button. */
+ ${rightLauncher} .bg-primary-soft-alpha{background-color:var(--color-background-primary-ghost-hover)!important;}
  /* Each native tab paints an opaque base and a separate selected/hover wash.
     Let the row own the glass, and retain the native state layer as a tint. */
  ${rightTabs} [data-app-shell-tab-controller="right"] [data-tab-id][class~="group/tab"]{background:transparent!important;--app-shell-tab-background:${rgba(c.ink,.10)}!important;}
