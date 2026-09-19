@@ -12,6 +12,8 @@ const color=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);
 export function validate(c){
  if(!c||c.schema!==1)throw Error('不支持的预设格式');
  c=structuredClone(c);
+ c.userMessageWash??=c.panel;c.replyWash??=c.panel;
+ c.userInk??=c.ink;c.assistantInk??=c.ink;
  c.settingsWash??=c.panel??'#f8fcff';c.settingsOverlay??=65;c.settingsBlur??=12;
  if(!color(c.settingsWash)||!Number.isFinite(c.settingsOverlay)||c.settingsOverlay<0||c.settingsOverlay>100||!Number.isFinite(c.settingsBlur)||c.settingsBlur<0||c.settingsBlur>30)throw Error('设置界面遮罩参数无效');
  c.chatMaxWidth??=null;
@@ -22,7 +24,7 @@ export function validate(c){
  if(!color(c.workspaceHeaderWash)||!Number.isFinite(c.workspaceHeaderOverlay)||c.workspaceHeaderOverlay<0||c.workspaceHeaderOverlay>100||!Number.isFinite(c.workspaceHeaderBlur)||c.workspaceHeaderBlur<0||c.workspaceHeaderBlur>30)throw Error('顶部工作空间毛玻璃参数无效');
  if(typeof c.name!=='string'||!c.name.trim()||c.name.length>60)throw Error('名称需要 1–60 个字符');
  if(!['light','dark'].includes(c.mode)||typeof c.sync!=='boolean')throw Error('主题模式无效');
- for(const k of ['ink','muted','accent','sidebarInk','panel','menuBg','menuInk'])if(!color(c[k]))throw Error('颜色无效: '+k);
+ for(const k of ['ink','userInk','assistantInk','userMessageWash','replyWash','muted','accent','sidebarInk','panel','menuBg','menuInk'])if(!color(c[k]))throw Error('颜色无效: '+k);
  const num=(v,a,b)=>typeof v==='number'&&Number.isFinite(v)&&v>=a&&v<=b;
  for(const k of ['panelOpacity','codeOpacity','replyOpacity','userMessageOpacity'])if(!num(c[k],0,100))throw Error('透明度无效');
  for(const key of ['home','chat','sidebar']){
@@ -173,13 +175,16 @@ export async function makeBundle(input){
     leaves the opaque elevated card behind it and misses free-text requests. */
  ${h} [data-codex-composer-request-navigation]{background:${panel}!important;border-color:${line}!important;}
  ${h} .composer-surface-chrome :is(textarea,.ProseMirror){color:${c.ink}!important;caret-color:${c.accent};}
- ${m} [data-markdown-text-style="assistant-message"]{background-color:${rgba(c.panel,c.replyOpacity/100)}!important;border-radius:10px;}
+ ${m} [data-markdown-text-style="assistant-message"]{background-color:${rgba(c.replyWash,c.replyOpacity/100)}!important;border-radius:10px;}
+ /* Override native message tones at the root; preserve link and syntax colors. */
+ ${m} [data-markdown-text-style="assistant-message"]{color:${c.assistantInk}!important;--color-text-primary:${c.assistantInk}!important;}
+ ${m} [data-markdown-text-tone="user-message"]{color:${c.userInk}!important;--color-text-primary:${c.userInk}!important;}
  /* Markdown files open in the right-side CodeMirror panel. Reuse the reply
     wash exactly so the editor stays readable and follows the same opacity
     control without painting terminals or non-Markdown file panels. */
  ${m} .cm-editor:has(.file-editor-heading,.cm-markdown-list-item,.cm-markdown-code-line){background-color:${rgba(c.panel,c.replyOpacity/100)}!important;}
  /* The native bubble owns the only user-message background, including its padding. */
- ${m} .bg-user-message{background-color:${rgba(c.panel,c.userMessageOpacity/100)}!important;}
+ ${m} .bg-user-message{background-color:${rgba(c.userMessageWash,c.userMessageOpacity/100)}!important;}
  ${m} [data-markdown-text-tone="user-message"]{background-color:transparent!important;}
  ${h} :is(pre,table,blockquote){background:${rgba(c.panel,c.codeOpacity/100)}!important;border-color:${line}!important;}
  ${h} .sticky.bottom-0>.pointer-events-none.absolute>.bg-gradient-to-t.from-token-main-surface-primary{background-image:none!important;}

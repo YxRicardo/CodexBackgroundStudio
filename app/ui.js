@@ -26,6 +26,8 @@ const english={
 english['PNG / JPG / WebP · 最大 6MB；超限 PNG/JPG 自动压缩']='PNG / JPG / WebP · max 6 MB; large PNGs and JPEGs are compressed automatically';
 Object.assign(english,{'使用 Codex 原生对话宽度':'Use native Codex chat width','对话最大宽度':'Chat maximum width','精确宽度（px）':'Exact width (px)','保持字号不变，调节对话内容的最大宽度。窄窗口自动收缩，输入框可能随之变宽。':'Adjust the maximum chat width without changing font size. Narrow windows shrink automatically; the composer may widen too.'});
 Object.assign(english,{'设置':'Settings','设置界面':'SETTINGS','设置界面预览':'Settings preview','常规':'General','通知':'Notifications','启动时打开':'Open at startup','外观':'Appearance','主题':'Theme','跟随当前配色':'Current colors','文字大小':'Text size','默认':'Default','简体中文⌄':'Simplified Chinese⌄','设置遮罩颜色':'Settings overlay color','设置遮罩强度':'Settings overlay strength','设置毛玻璃模糊':'Settings frosted-glass blur','复用对话背景，单独调整设置内容区的遮罩。侧栏沿用侧栏背景配置。':'Use the chat background with an independent overlay for settings content. The sidebar keeps its own background settings.'});
+Object.assign(english,{'用户消息文字':'User message text','系统回复文字':'Assistant reply text'});
+Object.assign(english,{'用户消息遮罩颜色':'User message overlay color','系统回复遮罩颜色':'Assistant reply overlay color','输入框 / 代码块':'Composer / code block'});
 const chinese=Object.fromEntries(Object.entries(english).map(([zh,en])=>[en,zh]));
 let locale=localStorage.getItem('background-studio-language')||'en';
 const t=text=>(locale==='en'?english[text]:chinese[text])||text;
@@ -66,7 +68,7 @@ $('imageControls').insertAdjacentHTML('afterbegin','<label class="toggle"><input
 document.querySelector('.recovery-panel')?.insertAdjacentHTML('beforeend','<button id="restartService">重启后台服务</button>');
 $('washSliders').innerHTML=slider('opacity','背景不透明度',0,100)+slider('washOpacity','遮罩强度',0,100);
 $('globalSliders').innerHTML=slider('panelOpacity','输入框不透明度',0,100)+slider('codeOpacity','代码块不透明度',0,100)+slider('replyOpacity','回复背景不透明度',0,100)+slider('userMessageOpacity','用户消息背景不透明度',0,100);
-for(const [id,label]of Object.entries({menuBg:'顶部菜单栏背景',menuInk:'顶部菜单栏文字',ink:'主要文字',muted:'次要文字',accent:'强调色',sidebarInk:'侧栏文字',panel:'输入框 / 代码块 / 消息'})){$('globalColors').insertAdjacentHTML('beforeend',`<div class="color-row"><label>${label}<input aria-label="${label}" id="${id}" type="color"></label></div>`);}
+for(const [id,label]of Object.entries({menuBg:'顶部菜单栏背景',menuInk:'顶部菜单栏文字',ink:'主要文字',userInk:'用户消息文字',assistantInk:'系统回复文字',userMessageWash:'用户消息遮罩颜色',replyWash:'系统回复遮罩颜色',muted:'次要文字',accent:'强调色',sidebarInk:'侧栏文字',panel:'输入框 / 代码块'})){$('globalColors').insertAdjacentHTML('beforeend',`<div class="color-row"><label>${label}<input aria-label="${label}" id="${id}" type="color"></label></div>`);}
 $('sharedSliders').innerHTML=slider('sidebarOverlay','侧栏遮罩强度',0,100)+slider('sidebarBlur','毛玻璃模糊',0,30,1,'px');
 $('workspaceHeaderSliders').innerHTML=slider('workspaceHeaderOverlay','顶部工作空间遮罩强度',0,100)+slider('workspaceHeaderBlur','顶部工作空间毛玻璃模糊',0,30,1,'px');
 $('settingsSliders').innerHTML=slider('settingsOverlay','设置遮罩强度',0,100)+slider('settingsBlur','设置毛玻璃模糊',0,30,1,'px');
@@ -78,6 +80,8 @@ for(const k of ['sidebarOverlay','sidebarBlur'])$(k).oninput=()=>{config[k]=Numb
 $('workspaceHeaderWash').oninput=()=>{config.workspaceHeaderWash=$('workspaceHeaderWash').value;changed();};
 for(const k of ['workspaceHeaderOverlay','workspaceHeaderBlur'])$(k).oninput=()=>{config[k]=Number($(k).value);changed();};
 function fill(){
+ config.userMessageWash??=config.panel;config.replyWash??=config.panel;
+ config.userInk??=config.ink;config.assistantInk??=config.ink;
  config.settingsWash??=config.panel??base.settingsWash;config.settingsOverlay??=base.settingsOverlay;config.settingsBlur??=base.settingsBlur;
  for(const k of ['settingsWash','settingsOverlay','settingsBlur'])$(k).value=config[k];
  config.chatMaxWidth??=null;
@@ -92,7 +96,7 @@ function fill(){
  $('name').value=config.name;$('sync').checked=config.sync;
  $('regionControls').hidden=region==='global';$('globalControls').hidden=region!=='global';$('syncWrap').hidden=region!=='chat';
  const r=region==='global'?config:config[region];
- for(const k of region==='global'?['mode','menuBg','menuInk','ink','muted','accent','sidebarInk','panel','panelOpacity','codeOpacity','replyOpacity','userMessageOpacity']:['type','color','color2','fit','x','y','zoom','blur','wash','opacity','washOpacity'])$(k).value=r[k];
+ for(const k of region==='global'?['mode','menuBg','menuInk','ink','userInk','assistantInk','userMessageWash','replyWash','muted','accent','sidebarInk','panel','panelOpacity','codeOpacity','replyOpacity','userMessageOpacity']:['type','color','color2','fit','x','y','zoom','blur','wash','opacity','washOpacity'])$(k).value=r[k];
  if(region!=='global')$('flipX').checked=Boolean(r.flipX);
  $('controlTitle').textContent={home:'首页背景',chat:'对话背景',sidebar:'侧栏背景',global:'配色与面板'}[region];
  document.querySelectorAll('#regions button').forEach(b=>b.classList.toggle('selected',b.dataset.region===region));
@@ -126,8 +130,10 @@ function preview(){
  Object.assign($('sampleSettings').style,{background:rgba(config.settingsWash,config.settingsOverlay/100),backdropFilter:'blur('+config.settingsBlur+'px)'});
  $('sampleHome').hidden=page!=='home';$('sampleChat').hidden=page!=='chat';
  document.querySelectorAll('#previewTabs button').forEach(b=>b.classList.toggle('selected',b.dataset.page===page));
- document.querySelector('.user-bubble').style.backgroundColor=rgba(config.panel,config.userMessageOpacity/100);
- $('sampleReply').style.backgroundColor=rgba(config.panel,config.replyOpacity/100);
+ document.querySelector('.user-bubble').style.backgroundColor=rgba(config.userMessageWash,config.userMessageOpacity/100);
+ document.querySelector('.user-bubble').style.color=config.userInk;
+ $('sampleReply').style.color=config.assistantInk;
+ $('sampleReply').style.backgroundColor=rgba(config.replyWash,config.replyOpacity/100);
  const panel=rgba(config.panel,config.panelOpacity/100),header=document.querySelector('.mock-header');header.style.background=rgba(config.workspaceHeaderWash,config.workspaceHeaderOverlay/100);header.style.backdropFilter=`blur(${config.workspaceHeaderBlur}px)`;header.style.webkitBackdropFilter=`blur(${config.workspaceHeaderBlur}px)`;document.querySelector('.mock-composer').style.background=panel;
  document.querySelector('.mock-composer b').style.background=config.accent;document.querySelector('.mock-composer b').style.color=config.panel;document.querySelector('pre').style.background=rgba(config.panel,config.codeOpacity/100);
 }
@@ -140,7 +146,7 @@ async function applyNow(){
 }
 for(const k of ['type','color','color2','fit','x','y','zoom','blur','wash','opacity','washOpacity'])$(k).addEventListener('input',()=>{config[region][k]=$(k).type==='range'?Number($(k).value):$(k).value;changed();});
 $('flipX').onchange=()=>{config[region].flipX=$('flipX').checked;changed();};
-for(const k of ['mode','menuBg','menuInk','ink','muted','accent','sidebarInk','panel','panelOpacity','codeOpacity','replyOpacity','userMessageOpacity'])$(k).addEventListener('input',()=>{config[k]=$(k).type==='range'?Number($(k).value):$(k).value;changed();});
+for(const k of ['mode','menuBg','menuInk','ink','userInk','assistantInk','userMessageWash','replyWash','muted','accent','sidebarInk','panel','panelOpacity','codeOpacity','replyOpacity','userMessageOpacity'])$(k).addEventListener('input',()=>{config[k]=$(k).type==='range'?Number($(k).value):$(k).value;changed();});
 $('name').oninput=()=>{config.name=$('name').value;changed();};$('sync').onchange=()=>{config.sync=$('sync').checked;changed();};
 $('regions').onclick=e=>{const b=e.target.closest('button');if(!b)return;region=b.dataset.region;if(region==='home'||region==='chat')page=region;fill();};
 $('previewTabs').onclick=e=>{const b=e.target.closest('button');if(b){page=b.dataset.page;preview();}};
