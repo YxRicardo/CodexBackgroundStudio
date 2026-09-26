@@ -15,7 +15,7 @@ The interface defaults to English and includes an in-app English / Chinese langu
 - Preview changes locally before applying them to Codex.
 - Save, import, export, and switch between local looks.
 - Apply a theme with validation and retain the active theme through the local service.
-- Restore the last theme applied by this app after Windows sign-in and the next Codex launch.
+- Start the background service at sign-in, then restore the last theme when you open Codex.
 
 ## Requirements
 
@@ -48,7 +48,7 @@ No personal files or preconfigured user theme are included in the repository.
 
 ## Compatibility
 
-Connection recovery never automatically restarts Codex. If the debugging connection is briefly unavailable, the service waits and reapplies the theme when it returns. If Codex was opened without debugging enabled, use the editor's manual connect action (which may restart Codex). Local connection and process-change records are saved in `work/connection-diagnostics.jsonl`, rotated at 1 MB with one previous file retained; they contain no task content.
+Sign-in recovery starts only the background service and waits for you to open Codex. It then allows about 15 seconds for the debugging connection to become ready. If needed, it makes one connection attempt, restarting Codex with debugging enabled. It never launches an absent app. Normal service restarts and temporary connection failures do not trigger automatic restarts. Diagnostics are saved in `work/connection-diagnostics.jsonl` and contain no task content.
 
 Compatibility update (2026-09-11): Windows Codex 26.908.4834.0 replaced the main surface's utility classes. Background Studio now locates it through the native header landmark, including shared sidebar wallpaper and settings rules. Live chat, wallpaper, shell alignment and overflow checks passed on this version; home and settings were not visually rechecked. Run `node app/verify-compatibility.mjs` with a theme applied to check old/new DOM fixtures and the current renderer.
 
@@ -77,7 +77,7 @@ Codex Background Studio 是一款 Windows 本地编辑器，用于配置 Codex �
 - 在应用到 Codex 前先进行本地预览。
 - 在本机保存、导入、导出和切换方案。
 - 应用主题时执行验证，并由本地服务保持当前主题。
-- Windows 登录后自动启动本地服务，并在下次打开 Codex 时恢复本 App 最后应用的主题。
+- Windows 登录后仅启动背景服务，等你打开 Codex 后自动连接并恢复最后应用的主题。
 
 ## 运行要求
 
@@ -110,7 +110,7 @@ node .\app\server.mjs
 
 ## 兼容性
 
-连接恢复不会自动重启 Codex。调试连接短暂不可用时，服务会等待连接恢复后重新应用主题。如果 Codex 启动时未开启调试连接，请在编辑器中手动连接（可能重启 Codex）。连接失败、恢复和进程变化记录保存在本地 `work/connection-diagnostics.jsonl`，达到 1 MB 时轮换并保留一份旧日志，不记录任务内容。
+开机恢复仅启动背景服务，不会主动打开 Codex。等你打开 Codex 后，服务会等待约 15 秒让调试连接就绪；若仍无法连接，则尝试恢复连接一次（必要时重启已打开的 Codex 并开启调试连接）。Codex 未运行时持续等待，不会主动启动它。平时重启背景服务或连接短暂中断不会自动重启 Codex。诊断记录保存在 `work/connection-diagnostics.jsonl`，不记录任务内容。
 
 2026-09-11 兼容更新：Windows Codex 26.908.4834.0 更换了主内容区类名。现已改用原生标题栏标记定位，并同步修复侧栏共用背景和设置页样式的定位。已在该版本实测当前对话页的背景、主区域对齐和横向溢出；首页与设置页未重新进行视觉验证。应用主题后，可运行 `node app/verify-compatibility.mjs` 检查新旧页面结构样例和当前窗口。
 

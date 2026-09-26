@@ -27,13 +27,13 @@ const codex = {
     },
   },
   matchTarget(target) {
-    return target?.type === "page" && String(target.url ?? "").startsWith("app://") && !/initialRoute=(%2f|\/)avatar-overlay/i.test(String(target.url));
+    return target?.type === "page" && String(target.url ?? "").startsWith("app://") && !/(?:\/detached-window\.html|initialRoute=(%2f|\/)(?:avatar-overlay|detached-window))/i.test(String(target.url));
   },
   verification: {
     // The root landmark is the only blocking check: it doubles as the
     // "app finished booting" signal and the minimal app fingerprint. Everything
     // else warns — the sidebar collapses, and CSS is inert on absent nodes.
-    rootAny: ["main.main-surface", "main:has([data-testid='app-shell-header-context-menu-surface'])"],
+    rootAny: ["main[data-app-shell-main-surface]", "main.main-surface", "main:has([data-testid='app-shell-header-context-menu-surface'])"],
     recommended: [
       { name: "sidebar", any: ["aside.app-shell-left-panel"] },
       { name: "composer", any: [".composer-surface-chrome", "main .ProseMirror[contenteditable=\"true\"]"] },

@@ -46,4 +46,4 @@ if ($listener) {
 }
 
 $node = if (Test-Path -LiteralPath $bundledNode) { $bundledNode } else { (Get-Command node.exe).Source }
-Start-Process -FilePath $node -ArgumentList ('"' + $serverScript + '"') -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog | Out-Null
+Start-Process -FilePath $node -ArgumentList ('"' + $serverScript + '" --recover-at-signin') -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog | Out-Null

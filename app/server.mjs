@@ -6,6 +6,7 @@ import {execFile,spawn} from 'node:child_process';
 import {promisify} from 'node:util';
 import {ROOT,defaults,validate,makeBundle} from './engine.mjs';
 import {createConnectionMonitor,createDiagnosticLog} from './connection-monitor.mjs';
+import {recoverAtSignIn} from './signin-recovery.mjs';
 import {listCdpTargets} from './core/src/cdp/session.mjs';
 import {getAdapter,probeApp,applyTheme,verifyTheme,watchTheme,resolveThemeTarget,restoreSkin,launchApp,findRunningPids} from './core/src/index.mjs';
 const exec=promisify(execFile),adapter=getAdapter('codex'),port=9335,HTTP_PORT=47831,token=crypto.randomBytes(32).toString('hex');
@@ -110,4 +111,18 @@ const server=http.createServer(async(req,res)=>{
  }catch(e){res.writeHead(400,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify({error:e.message}));}
 });
 server.on('error',e=>{console.error(e.message);process.exit(1);});
-server.listen(HTTP_PORT,'127.0.0.1',async()=>{await write('server.json',{pid:process.pid,port:HTTP_PORT,root:ROOT});console.log('Background Studio http://127.0.0.1:'+HTTP_PORT);await diagnosticLog({type:'service-start',policy:'never-auto-restart'});if(enabled&&active)await startWatch(active);const timer=setInterval(()=>monitorConnection(),5000);timer.unref();});
+server.listen(HTTP_PORT,'127.0.0.1',async()=>{
+ await write('server.json',{pid:process.pid,port:HTTP_PORT,root:ROOT});
+ console.log('Background Studio http://127.0.0.1:'+HTTP_PORT);
+ const signIn=process.argv.includes('--recover-at-signin');
+ await diagnosticLog({type:'service-start',policy:signIn?'wait-for-codex-then-connect-once':'never-auto-restart'});
+ if(enabled&&active)await startWatch(active);
+ const timer=setInterval(()=>monitorConnection(),5000);timer.unref();
+ if(signIn)await recoverAtSignIn({
+  isEnabled:async()=>enabled&&active&&!restarting&&(await autoStartStatus()).enabled,
+  findPids:()=>findRunningPids(adapter),
+  probe:async()=>{const targets=await listCdpTargets(port,1500);if(!targets.some(target=>adapter.matchTarget(target)))throw Error('Codex connection not ready');},
+  launch:()=>serial(async()=>{if(enabled&&active&&!restarting&&(await autoStartStatus()).enabled)return launchApp({adapter,port,restartExisting:true,requireRunning:true,timeoutMs:30000});}),
+  log:diagnosticLog,
+ });
+});

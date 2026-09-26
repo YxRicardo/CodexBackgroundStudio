@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { execFile, spawn } from "node:child_process";
 import { promisify } from "node:util";
 import { findTargets } from "./injector.mjs";
@@ -136,13 +137,18 @@ async function discoverWindowsRegistry(adapter, config) {
 
 async function discoverWindows(adapter, config) {
   if (config.appxPackage) {
-    const script = `(Get-AppxPackage ${config.appxPackage} | Sort-Object Version -Descending | Select-Object -First 1).InstallLocation`;
+    const script = `$p = Get-AppxPackage '${config.appxPackage.replace(/'/g, "''")}' | Sort-Object Version -Descending | Select-Object -First 1; if ($p) { $m = Get-AppxPackageManifest $p; @{ appPath = $p.InstallLocation; family = $p.PackageFamilyName; applications = @($m.Package.Applications.Application | ForEach-Object { @{ id = $_.Id; executable = $_.Executable } }) } | ConvertTo-Json -Depth 4 -Compress }`;
     try {
       const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { windowsHide: true });
-      const appPath = stdout.trim();
-      if (appPath) {
+      if (stdout.trim()) {
+        const { appPath, family, applications } = JSON.parse(stdout);
         const executable = path.join(appPath, config.executableRelative);
-        if (await isExecutable(executable)) return { appId: adapter.id, appPath, executable };
+        const normalize = (value) => String(value).replaceAll("/", "\\").toLowerCase();
+        const application = applications.find((item) => normalize(item.executable) === normalize(config.executableRelative));
+        if (await isExecutable(executable)) {
+          if (!application?.id || !family) throw new Error("The package manifest does not contain the configured application.");
+          return { appId: adapter.id, appPath, executable, appUserModelId: `${family}!${application.id}` };
+        }
       }
     } catch { /* Fall through to explicit candidates. */ }
   }
@@ -233,9 +239,10 @@ async function stopExisting(adapter, pids, platform = process.platform, executab
   if (platform === "darwin" && config.bundleId) {
     await execFileAsync("osascript", ["-e", `tell application id "${config.bundleId}" to quit`]).catch(() => {});
   } else if (platform === "win32" && pids.length) {
-    // /T also stops child process trees (gpu/network/renderer helpers) so the
-    // CDP port is actually released before relaunching.
-    await execFileAsync("taskkill.exe", ["/F", "/T", ...pids.flatMap((pid) => ["/PID", String(pid)])], { windowsHide: true }).catch(() => {});
+    // Codex's matching PIDs already include its renderer/GPU helpers. Do not
+    // kill their entire trees: those also contain running agent work and tools.
+    const treeFlags = adapter.id === "codex" ? [] : ["/T"];
+    await execFileAsync("taskkill.exe", ["/F", ...treeFlags, ...pids.flatMap((pid) => ["/PID", String(pid)])], { windowsHide: true }).catch(() => {});
   }
   for (let attempt = 0; attempt < 30; attempt += 1) {
     if (!(await findRunningPids(adapter, platform, executablePath)).length) return;
@@ -248,7 +255,51 @@ async function stopExisting(adapter, pids, platform = process.platform, executab
   }
 }
 
-export async function launchApp({ adapter, port = adapter.defaultPort, appPath = null, profilePath = null, restartExisting = false, timeoutMs = 30000 }) {
+export async function buildLaunchArgs({ adapter, executable, port, profilePath, platform = process.platform }) {
+  const args = [`--remote-debugging-address=127.0.0.1`, `--remote-debugging-port=${port}`];
+  // Owl selects its Chromium profile before the Electron-compatible app starts.
+  // Pass the existing profile explicitly so remote debugging can start without
+  // creating a new profile or moving the user's signed-in browser state.
+  if (!profilePath && adapter.id === "codex" && platform === "win32") {
+    const runtime = path.join(path.dirname(executable), "owl-shell-runtime.json");
+    if (await isExecutable(runtime)) {
+      const appData = process.env.APPDATA;
+      if (!appData) throw new Error("APPDATA is required to locate the existing Codex Owl profile.");
+      profilePath = path.join(appData, "Codex", "web", "Codex");
+    }
+  }
+  if (profilePath) {
+    const resolved = path.resolve(profilePath);
+    await fs.mkdir(resolved, { recursive: true });
+    args.push(`--user-data-dir=${resolved}`);
+  }
+  return args;
+}
+
+// Quote for Windows command-line parsing, not PowerShell evaluation. The entire
+// result is transported as base64 so spaces, quotes and metacharacters survive.
+export function quoteWindowsArgument(value) {
+  return `"${String(value).replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/g, '$1$1')}"`;
+}
+
+export async function startDiscoveredApp(discovered, args) {
+  if (process.platform === "win32" && discovered.appUserModelId) {
+    const helper = fileURLToPath(new URL("./activate-package.ps1", import.meta.url));
+    const encoded = Buffer.from(args.map(quoteWindowsArgument).join(" "), "utf8").toString("base64");
+    const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", helper,
+      "-AppUserModelId", discovered.appUserModelId, "-ArgumentsBase64", encoded], { windowsHide: true, timeout: 30000 });
+    return JSON.parse(stdout).pid;
+  }
+  const child = spawn(discovered.executable, args, { detached: true, stdio: "ignore", windowsHide: true });
+  await new Promise((resolve, reject) => {
+    child.once("spawn", resolve);
+    child.once("error", reject);
+  });
+  child.unref();
+  return child.pid;
+}
+
+export async function launchApp({ adapter, port = adapter.defaultPort, appPath = null, profilePath = null, restartExisting = false, requireRunning = false, timeoutMs = 30000 }) {
   const filePorts = await resolveDebugPorts(adapter, process.platform);
   const readyCandidates = [...new Set([port, ...filePorts])];
   let readyTargets = [];
@@ -280,7 +331,11 @@ export async function launchApp({ adapter, port = adapter.defaultPort, appPath =
     throw new Error(`${adapter.displayName} is not installed or could not be discovered.`);
   }
 
+  const args = await buildLaunchArgs({ adapter, executable: discovered.executable, port, profilePath });
   const runningPids = await findRunningPids(adapter, process.platform, discovered.executable);
+  if (requireRunning && !runningPids.length) {
+    throw new Error(`${adapter.displayName} was closed; automatic connection cancelled.`);
+  }
   if (runningPids.length) {
     if (!restartExisting) {
       const error = new Error(`${adapter.displayName} is already running without CodeDrobe on port ${port}. Close it or pass --restart-existing.`);
@@ -306,14 +361,7 @@ export async function launchApp({ adapter, port = adapter.defaultPort, appPath =
     throw error;
   }
 
-  const args = [`--remote-debugging-address=127.0.0.1`, `--remote-debugging-port=${port}`];
-  if (profilePath) {
-    const resolved = path.resolve(profilePath);
-    await fs.mkdir(resolved, { recursive: true });
-    args.push(`--user-data-dir=${resolved}`);
-  }
-  const child = spawn(discovered.executable, args, { detached: true, stdio: "ignore" });
-  child.unref();
+  const launchedPid = await startDiscoveredApp(discovered, args);
 
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -324,7 +372,7 @@ export async function launchApp({ adapter, port = adapter.defaultPort, appPath =
       try {
         const targets = await findTargets(adapter, candidate);
         if (targets.length) {
-          return { appId: adapter.id, port: candidate, executable: discovered.executable, pid: child.pid, targets: targets.length };
+          return { appId: adapter.id, port: candidate, executable: discovered.executable, pid: launchedPid, targets: targets.length };
         }
       } catch { /* Wait for the CDP endpoint. */ }
     }

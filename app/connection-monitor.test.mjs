@@ -44,8 +44,11 @@ test('diagnostic log serializes concurrent writes and rotates',async()=>{
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
 
-test('only the explicit connect route may request a forced launch',async()=>{
+test('forced launch is limited to manual connect and the sign-in recovery callback',async()=>{
  const source=await fs.readFile(new URL('./server.mjs',import.meta.url),'utf8');
  const calls=source.split('\n').filter(line=>line.includes('await launchApp('));
  assert.equal(calls.length,1);assert.ok(calls[0].includes("case '/api/connect'"));
+ const recovery=source.split('\n').filter(line=>line.includes('return launchApp('));
+ assert.equal(recovery.length,1);assert.ok(recovery[0].includes('launch:()=>serial('));
+ assert.ok(source.includes('if(signIn)await recoverAtSignIn('));
 });
