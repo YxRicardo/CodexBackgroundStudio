@@ -196,6 +196,10 @@ export async function makeBundle(input){
  ${m} [data-markdown-text-tone="user-message"]{background-color:transparent!important;}
  ${h} :is(pre,table,blockquote){background:${rgba(c.panel,c.codeOpacity/100)}!important;border-color:${line}!important;}
  ${h} .sticky.bottom-0>.pointer-events-none.absolute>.bg-gradient-to-t.from-token-main-surface-primary{background-image:none!important;}
+ /* The absolute thread footer now paints a separate full-width surface behind
+    the composer. Scope transparency to its decorative layer, not controls. */
+ ${m} .thread-scroll-container>div:has(>[data-pip-obstacle="thread-footer"])>div[aria-hidden="true"].pointer-events-none.bg-surface{background:transparent!important;}
+ ${m} .thread-scroll-container div[aria-hidden="true"].sticky.bottom-0>div[aria-hidden="true"].pointer-events-none.bg-gradient-to-t.from-surface{background-image:none!important;}
  ${m}:not(:has(.dream-home)) .sticky.bottom-0>.pointer-events-none.absolute.inset-x-0.bottom-0.bg-gradient-to-t.from-surface{background-image:none!important;}
  #codedrobe-codex-skin-chrome{display:none!important;pointer-events:none!important;}
  ${shared}`;
