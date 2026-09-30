@@ -123,6 +123,12 @@ export async function makeBundle(input){
     fade as Work. Its opaque token color appears as a white strip on artwork. */
  ${m} [class*="_MainContentTopFade_"]{background-image:none!important;}
  ${m} [role="main"]{background:transparent!important;}
+ /* Your dot embeds its own messaging canvas inside the themed shell. Let
+    the shell own the chat wallpaper and wash, without a second opaque base. */
+ ${m} .messaging-root.messaging-embedded,${m} .messaging-embedded .thread-pane{background:transparent!important;}
+ ${m} .pointer-events-none[style*="position-anchor: --orbit-messaging-header-"]{background-image:none!important;}
+ /* Its composer footer also paints a solid-to-transparent native fade. */
+ ${m} .messaging-embedded .conversation-footer .pointer-events-none.bg-gradient-to-t.from-surface{background-image:none!important;}
  ${regionCSS(s,c.sidebar,'sidebar')}
  /* The native conversation navigation now paints its own translucent wash.
     Let the configured sidebar surface own the wash and backdrop blur. */
